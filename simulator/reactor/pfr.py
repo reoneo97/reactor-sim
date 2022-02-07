@@ -21,7 +21,6 @@ class IdealPFR(Reactor):
         ts = np.arange(0, time_end, time_interval)
         vol_n = int(self.vol//self.flow_rate) + 1 
         vol_intervals, vol_step = np.linspace(0,self.vol,vol_n,retstep=True)
-        vol_intervals = vol_intervals.reshape(-1,1)
         
         # Calculate starting amount in each volume_step
         pa_amt = vol_step/self.flow_rate*self.pa_feed
@@ -34,23 +33,62 @@ class IdealPFR(Reactor):
 
         
         # Logging the number of mol
-        mol_profile = np.zeros(shape=(vol_n,4))
-        mol_profile[:,0] = pa_amt
-        mol_profile[:,1] = ipa_amt
-        mol_profile[:,2] = ipp_amt
-        mol_profile[:,3] = water_amt
 
-        mol_profile = np.concatenate([vol_intervals,mol_profile],axis=1)
+        conc_profile = np.zeros(shape=(vol_n,4))
+        conc_profile[:,0] = pa_amt/vol_step
+        conc_profile[:,1] = ipa_amt/vol_step
+        conc_profile[:,2] = 0
+        conc_profile[:,3] = 0
+
+        mol_profile = np.concatenate(
+            [vol_intervals.reshape(-1, 1), conc_profile], axis=1)
 
 
         for t in ts[1:]:
-            new_mol_profile = np.zeros(shape=(vol_n,6))
-            new_mol_profile[:,0] = vol_intervals
-            vol_added = time_interval* self.flow_rate
-            print(mol_profile[0,1:])
-            pa_conc, ipa_conc, ipp_conc, water_conc = [i/self.vol_step for i in mol_profile[0,1:]]
-            break
-    
+            new_conc_profile = np.zeros(shape=(vol_n,6))
+            new_conc_profile[:,0] = vol_intervals
+            # vol_added = time_interval* self.flow_rate
+            
+            # Concentrations from previous interval 
+            pa_conc, ipa_conc, ipp_conc, water_conc = conc_profile[0,1:]
+            rate = self.reaction.get_rate(
+                ca=pa_conc, cb=ipa_conc, ce=ipp_conc, cw=water_conc,
+                T=self.temperature
+            )/60
+            
+            dn = rate*time_interval*vol_step
+            pa_in = self.pa_feed*time_interval
+            ipa_in = self.ipa_feed*time_interval
+            
+            pa_amt = pa_in + pa_conc*vol_step -pa_conc*time_interval*self.flow_rate - dn 
+            ipa_amt = ipa_in + ipa_conc*vol_step- ipa_conc*time_interval*self.flow_rate - dn
+            ipp_amt = ipp_conc*vol_step- ipp_conc*time_interval*self.flow_rate + dn
+            water_amt = water_conc*vol_step- water_conc*time_interval*self.flow_rate + dn
+
+            new_conc_profile[0,1] = pa_amt/vol_step
+            new_conc_profile[0,2] = ipa_amt/vol_step
+            new_conc_profile[0,3] = ipp_amt/vol_step
+            new_conc_profile[0,4] = water_amt/vol_step
+
+            for v in range(1,82):
+                pa_conc, ipa_conc, ipp_conc, water_conc = conc_profile[v, 1:]
+                rate = self.reaction.get_rate(
+                    ca=pa_conc, cb=ipa_conc, ce=ipp_conc, cw=water_conc,
+                    T=self.temperature
+                )/60
+
+                dn = rate*time_interval*vol_step
+                
+                pa_in = new_conc_profile[v-1,1]*time_interval*self.flow_rate
+                ipa_in = new_conc_profile[v-1,2]*time_interval*self.flow_rate
+                ipp_in = new_conc_profile[v-1,3]*time_interval*self.flow_rate
+                water_in = new_conc_profile[v-1, 4] * \
+                    time_interval*self.flow_rate
+
+                pa_amt = pa_in + pa_conc*vol_step -pa_conc*time_interval*self.flow_rate - dn 
+                ipa_amt = ipa_in + ipa_conc*vol_step- ipa_conc*time_interval*self.flow_rate - dn
+                ipp_amt = ipp_conc*vol_step- ipp_conc*time_interval*self.flow_rate + dn
+                water_amt = water_conc*vol_step- water_conc*time_interval*self.flow_rate + dn
 
     def init_logs(self,ts):
         self.logs = []

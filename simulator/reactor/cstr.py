@@ -45,12 +45,13 @@ class IdealCSTR(Reactor):
                 ca = pa_conc, cb = ipa_conc, ce= ipp_conc, cw = water_conc,
                 T=self.temperature
             )/60  # Rate converted from h-1 to min-1
-            dc = rate*time_interval*self.vol
+            dc = rate*time_interval
+            dn = dc*self.vol
 
-            pa_amt += (self.pa_feed - dc)
-            ipa_amt += (self.ipa_feed - dc)
-            water_amt += dc
-            ipp_amt += dc
+            pa_amt += (self.pa_feed - dn)
+            ipa_amt += (self.ipa_feed - dn)
+            water_amt += dn
+            ipp_amt += dn
 
             amts = [pa_amt, ipa_amt, water_amt, ipp_amt]
             pa_conc, ipa_conc, ipp_conc, water_conc = [
