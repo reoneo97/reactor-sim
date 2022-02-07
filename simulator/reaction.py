@@ -29,7 +29,7 @@ class Reaction:
         """Function that returns the rate constant of the reaction given the 
         temperature as a variable.
 
-
+        Rate Constant that is calculated is in units of mol-1 dm3 min-1
         Args:
             T (float): Temperature
         """
@@ -62,8 +62,12 @@ class EquilibriumReaction:
         exp_term = self.G/(const_R*T)
         return self.A*exp(exp_term)
 
-
-class HomogeneousReaction:
+class ReactionModel():
+    
+    def __init__(self) -> None:
+        super(ReactionModel, self).__init__()
+        
+class HomogeneousReaction(ReactionModel):
     """
     Reaction Kinetics model for an equilibrium reaction with homogeneous catalysis
     Equilibrium Reaction that contains both a forward and a backward reaction
@@ -75,16 +79,17 @@ class HomogeneousReaction:
         self.forward = forward_rxn
         self.backward = backward_rxn
 
-    def get_rate(self, reactant_concs: List[float], product_concs: List[float], T: float):
-        # TODO: Use conversion to perform calculations instead of concentration
+    def get_rate(self, ca:float, cb:float, ce:float, cw:float, T: float):
 
+        reactant_concs = [ca,cb]
+        product_concs = [ce, cw]
+        
         forward_rate = self.forward.get_rate(reactant_concs, T)
         backward_rate = self.backward.get_rate(product_concs, T)
-        print(forward_rate, backward_rate)
         return forward_rate - backward_rate
 
 
-class LHHWReaction:
+class LHHWReaction(ReactionModel):
     """
     Reaction Kinetics model for an equilibrium reaction with heterogeneous catalysis
     Follows the LHHW Model where the reaction is surface reaction controlled
@@ -120,11 +125,11 @@ class LHHWReaction:
         return num/denom
 
 
-def p_TSA_homogeneous():
+def __get_ptsa_reaction():
     forward = Reaction(150241, 40770, [1, 1])
-    backward = Reaction(2130, 8890, [1, 1])
+    backward = Reaction(7.1166, 13128.3, [1, 1])
     rxn_model = HomogeneousReaction(forward, backward)
-    print(rxn_model.get_rate([1, 100], [1, 1], 500))
+    # print(rxn_model.get_rate([1, 100], [1, 1], 500))
     return rxn_model
 
 
@@ -133,5 +138,4 @@ def zna_sg_hetero():
 # test = EquilibriumReaction(1,1)
 # print(test(1))
 
-
-p_TSA_homogeneous()
+ptsa_reaction = __get_ptsa_reaction()
