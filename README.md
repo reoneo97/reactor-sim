@@ -42,5 +42,9 @@ Reactor Design Equations
 
 ## Reactor 
 Reactors should be held in isothermal conditions. Esterification reaction is an equilibrium reaction and if the conditions for the reactor are adiabatic, the backward reaction will be favoured with time (Le Chatlier's Principle)
+
+1. CSTR using p-Toluene Sulfonic Acid catalyst
+2. PFR using p-Toluene Sulfonic Acid
+3. Packed bed Reactor using ZnA/SG 
 ## References
 
