@@ -1,9 +1,6 @@
 from simulator.reaction import ptsa_reaction, ReactionModel
-import simulator.const as const
 from simulator.reactor import IdealCSTR, IdealPFR
 from loguru import logger
-
-
 
 
 temp = 443
@@ -17,3 +14,4 @@ time_end = 100
 
 reactor_model = IdealPFR(pa_feed, M, vol, temp, rxn)
 reactor_model.run(time_interval, time_end)
+conv = reactor_model.get_conversion()

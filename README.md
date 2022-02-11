@@ -48,3 +48,4 @@ Reactors should be held in isothermal conditions. Esterification reaction is an 
 3. Packed bed Reactor using ZnA/SG 
 ## References
 
+https://www.chemanalyst.com/Pricing-data/isopropyl-alcohol-31

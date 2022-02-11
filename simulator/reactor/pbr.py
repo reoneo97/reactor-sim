@@ -7,6 +7,7 @@ from .. import const
 from ..reaction import ReactionModel
 from ..reactor import Reactor
 
+
 class IdealPBR(Reactor):
     def __init__(self,
                  pa_feed: float, M: int, weight: float, temperature: float,
