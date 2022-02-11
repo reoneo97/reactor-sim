@@ -47,13 +47,30 @@ class Reaction:
             prod *= conc**order
         return k*prod
 
+class ArrheniusEquation:
 
+    def __init__(self,A,Ea):
+        self.A = A
+        self.Ea = Ea
+
+    def arrhenius_eqn(self, T) -> float:
+        """Function that returns the rate constant of the reaction given the 
+        temperature as a variable.
+
+        Rate Constant that is calculated is in units of mol-1 dm3 min-1
+        Args:
+            T (float): Temperature
+        """
+        exp_term = -self.E_a/(const_R*T)
+        return self.A*exp(exp_term)
+
+    def __call__(self, T) -> float:
+        return self.arrhenius_eqn(T)
 class EquilibriumReaction:
     """
     Model to calculate equilibrium constant given parameters
     Model follows general equation of K = Aexp(|G|/RT)        
     """
-
     def __init__(self, A, G):
         self.A = A
         self.G = G
@@ -96,7 +113,7 @@ class LHHWReaction(ReactionModel):
 
     """
 
-    def __init__(self, ks: Reaction, KA: EquilibriumReaction,
+    def __init__(self, ks: ArrheniusEquation, KA: EquilibriumReaction,
                  KB: EquilibriumReaction, KE: EquilibriumReaction,
                  KW: EquilibriumReaction, KS: EquilibriumReaction):
 
@@ -133,9 +150,17 @@ def __get_ptsa_reaction():
     return rxn_model
 
 
-def zna_sg_hetero():
-    pass
-# test = EquilibriumReaction(1,1)
+def __get_zna_reaction():
+    
+    KA = EquilibriumReaction(4.71397e-19, 105361.69)
+    KB = EquilibriumReaction(4.967627e-17, 87663.523)
+    KE = EquilibriumReaction(4.58858e-15, 87893.245)
+    KW = EquilibriumReaction(3.4822796e-16, 88018.49)
+    ks = ArrheniusEquation(1257.925, 41589.037)
+    KS = EquilibriumReaction(75074.872, -32827.8428)
+    
+    reaction_model = LHHWReaction(ks,KA,KB,KE,KW,KS)
+    return reaction_model
 # print(test(1))
 
 ptsa_reaction = __get_ptsa_reaction()
