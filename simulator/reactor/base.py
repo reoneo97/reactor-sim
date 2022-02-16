@@ -1,10 +1,11 @@
 from .. import const
 from ..reaction import ReactionModel
 
+
 class Reactor:
     def __init__(self,
-                 pa_feed: float, M: int, vol: float, temperature: float,
-                 rxn_model: ReactionModel):
+                 pa_feed: float, M: int, temperature: float, vol: float = None,
+                 rxn_model: ReactionModel = None):
         self.temperature = temperature
         self.pa_feed = pa_feed
         self.M = M

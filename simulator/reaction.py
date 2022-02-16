@@ -47,9 +47,10 @@ class Reaction:
             prod *= conc**order
         return k*prod
 
+
 class ArrheniusEquation:
 
-    def __init__(self,A,Ea):
+    def __init__(self, A, Ea):
         self.A = A
         self.Ea = Ea
 
@@ -61,16 +62,19 @@ class ArrheniusEquation:
         Args:
             T (float): Temperature
         """
-        exp_term = -self.E_a/(const_R*T)
+        exp_term = -self.Ea/(const_R*T)
         return self.A*exp(exp_term)
 
     def __call__(self, T) -> float:
         return self.arrhenius_eqn(T)
+
+
 class EquilibriumReaction:
     """
     Model to calculate equilibrium constant given parameters
     Model follows general equation of K = Aexp(|G|/RT)        
     """
+
     def __init__(self, A, G):
         self.A = A
         self.G = G
@@ -79,11 +83,13 @@ class EquilibriumReaction:
         exp_term = self.G/(const_R*T)
         return self.A*exp(exp_term)
 
+
 class ReactionModel():
-    
+
     def __init__(self) -> None:
         super(ReactionModel, self).__init__()
-        
+
+
 class HomogeneousReaction(ReactionModel):
     """
     Reaction Kinetics model for an equilibrium reaction with homogeneous catalysis
@@ -96,13 +102,14 @@ class HomogeneousReaction(ReactionModel):
         self.forward = forward_rxn
         self.backward = backward_rxn
 
-    def get_rate(self, ca:float, cb:float, ce:float, cw:float, T: float):
+    def get_rate(self, ca: float, cb: float, ce: float, cw: float, T: float):
 
-        reactant_concs = [ca,cb]
+        reactant_concs = [ca, cb]
         product_concs = [ce, cw]
-        
-        forward_rate = self.forward.get_rate(reactant_concs, T)
-        backward_rate = self.backward.get_rate(product_concs, T)
+
+        # Values are given in units of h^-1
+        forward_rate = self.forward.get_rate(reactant_concs, T)/3600
+        backward_rate = self.backward.get_rate(product_concs, T)/3600
         return forward_rate - backward_rate
 
 
@@ -122,9 +129,11 @@ class LHHWReaction(ReactionModel):
         self.KB = KB
         self.KE = KE
         self.KW = KW
-        self.KS = KS 
+        self.KS = KS
 
-    def get_rate(self,ca, cb, ce, cw,  T):
+    def get_rate(self, ca, cb, ce, cw,  T):
+        assert all([i >= 0 for i in [ca, cb, ce, cw, T]]
+                   ), "Concentration values must be postive"
         # Calculate Surface Rxn Rate Constant
         ks = self.ks(T)
         # Calculate Adsorption Equilibrium Constant
@@ -132,12 +141,13 @@ class LHHWReaction(ReactionModel):
         kb = self.KB(T)
         ke = self.KE(T)
         kw = self.KW(T)
-        KS =self.KS(T)
+        KS = self.KS(T)
         # Denominator Calculation
-        denom = (1 + ka*ca + kb*cb + ke*ce + kw*cw)**2 
+        denom = (1 + ka*ca + kb*cb + ke*ce + kw*cw)**2
+        # print(denom)
         # Numerator Calculation
         term1 = ka*kb*ca*cb
-        term2 = ce*cw/(KS*ke*kw)
+        term2 = ce*cw*ke*kw/(KS)
         num = ks*(term1 - term2)
         return num/denom
 
@@ -151,16 +161,22 @@ def __get_ptsa_reaction():
 
 
 def __get_zna_reaction():
-    
+
     KA = EquilibriumReaction(4.71397e-19, 105361.69)
     KB = EquilibriumReaction(4.967627e-17, 87663.523)
     KE = EquilibriumReaction(4.58858e-15, 87893.245)
     KW = EquilibriumReaction(3.4822796e-16, 88018.49)
     ks = ArrheniusEquation(1257.925, 41589.037)
     KS = EquilibriumReaction(75074.872, -32827.8428)
-    
-    reaction_model = LHHWReaction(ks,KA,KB,KE,KW,KS)
+
+    reaction_model = LHHWReaction(ks, KA, KB, KE, KW, KS)
     return reaction_model
 # print(test(1))
 
+
 ptsa_reaction = __get_ptsa_reaction()
+zna_reaction = __get_zna_reaction()
+
+# print(zna_reaction.get_rate(10, 10, 0, 0, 400)*5)
+
+# print(zna_reaction.ks(373))
