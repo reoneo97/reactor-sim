@@ -13,8 +13,7 @@ class IdealCSTR(Reactor):
                  pa_feed: float, M: int, vol: float, temperature: float,
                  rxn_model: ReactionModel):
         # Initial Setup in base model
-        super().__init__(pa_feed,M, vol,temperature, rxn_model)
-
+        super().__init__(pa_feed, M, temperature, vol, rxn_model)
 
     def run(self, time_interval: float = 0.1, time_end: float = 300.):
         """Performs the simulation of the CSTR 
@@ -42,7 +41,7 @@ class IdealCSTR(Reactor):
         for t in tqdm(ts):
 
             rate = self.reaction.get_rate(
-                ca = pa_conc, cb = ipa_conc, ce= ipp_conc, cw = water_conc,
+                ca=pa_conc, cb=ipa_conc, ce=ipp_conc, cw=water_conc,
                 T=self.temperature
             )/60  # Rate converted from h-1 to min-1
             dc = rate*time_interval

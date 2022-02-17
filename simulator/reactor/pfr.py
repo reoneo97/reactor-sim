@@ -14,7 +14,7 @@ class IdealPFR(Reactor):
                  pa_feed: float, M: int, vol: float, temperature: float,
                  rxn_model: ReactionModel):
         # Initial Setup in base model
-        super().__init__(pa_feed, M, vol, temperature, rxn_model)
+        super().__init__(pa_feed, M, temperature, vol, rxn_model)
         self.init_logs()
 
     def run(self, time_interval: float = 0.1, time_end: float = 300):
@@ -55,7 +55,7 @@ class IdealPFR(Reactor):
             rate = self.reaction.get_rate(
                 ca=pa_conc, cb=ipa_conc, ce=ipp_conc, cw=water_conc,
                 T=self.temperature
-            )/60
+            )*60
 
             dn = rate*time_interval*vol_step
             pa_in = self.pa_feed*time_interval
@@ -78,7 +78,7 @@ class IdealPFR(Reactor):
                 rate = self.reaction.get_rate(
                     ca=pa_conc, cb=ipa_conc, ce=ipp_conc, cw=water_conc,
                     T=self.temperature
-                )/60
+                )*60  # Simulation in min but rate equation in h^-1
 
                 dn = rate*time_interval*vol_step
 

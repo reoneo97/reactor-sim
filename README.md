@@ -4,12 +4,24 @@ Repository for Final Year Design Project python simulation
 ## Task 
 Design a reactor for esterification of palmitic acid with isopropanol to produce isopropyl palmitate (IPP)
 
-### Specifications:
-Target IPP Purity: 99%
-Plant Capacity: 600 kilo Tonne
-Feedstock: 4% Weight Palmitic Acid
 
-Palmitic Acid Weight = 24 kilo tonne
+## TODO:
+1. Metrics 
+To add in design metrics (other than conversion) such as costs, purity, heat recovered etc. This will allow for optimization to be conducted
+2. Heating Duty calculations
+3. Non-isothermal consideration
+4.  
+
+## How to Run:
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/reoneo97/reactor-sim/app.py) for an older version of the build. 
+
+Alternatively clone the repo, install requirements and use `streamlit run app.py` 
+
+### Specifications:
+- Target IPP Purity: 99% 
+- Plant Capacity: 600 kilo Tonne
+- Feedstock: 4% Weight Palmitic Acid
+- Palmitic Acid Weight = 24 kilo tonne
 # Reaction Information
 
 $$
