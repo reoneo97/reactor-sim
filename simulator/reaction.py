@@ -98,19 +98,23 @@ class HomogeneousReaction(ReactionModel):
     -r_a = k_1 c_a c_b - k_2 *  c_c * c_d
     """
 
-    def __init__(self, forward_rxn: Reaction, backward_rxn: Reaction):
+    def __init__(self, forward_rxn: Reaction, backward_rxn: Reaction, heat: float):
         self.forward = forward_rxn
         self.backward = backward_rxn
+        self.heat = heat
 
-    def get_rate(self, ca: float, cb: float, ce: float, cw: float, T: float):
+    def get_rate(self, ca: float, cb: float, ce: float, cw: float, T: float, heat=False):
 
         reactant_concs = [ca, cb]
         product_concs = [ce, cw]
 
-        # Values are given in units of h^-1
+        # First convert the reaction rates to s^-1
         forward_rate = self.forward.get_rate(reactant_concs, T)/3600
         backward_rate = self.backward.get_rate(product_concs, T)/3600
-        return forward_rate - backward_rate
+        net_rate = forward_rate - backward_rate
+        if heat:
+            return net_rate, net_rate*self.heat
+        return net_rate
 
 
 class LHHWReaction(ReactionModel):
@@ -153,9 +157,11 @@ class LHHWReaction(ReactionModel):
 
 
 def __get_ptsa_reaction():
+    # Reaction Constants are given in units of h^-1
     forward = Reaction(150241, 40770, [1, 1])
     backward = Reaction(7.1166, 13128.3, [1, 1])
-    rxn_model = HomogeneousReaction(forward, backward)
+    heat = 7984
+    rxn_model = HomogeneousReaction(forward, backward, heat=heat)
     # print(rxn_model.get_rate([1, 100], [1, 1], 500))
     return rxn_model
 
@@ -168,8 +174,8 @@ def __get_zna_reaction():
     KW = EquilibriumReaction(3.4822796e-16, 88018.49)
     ks = ArrheniusEquation(1257.925, 41589.037)
     KS = EquilibriumReaction(75074.872, -32827.8428)
-
-    reaction_model = LHHWReaction(ks, KA, KB, KE, KW, KS)
+    heat = 7984
+    reaction_model = LHHWReaction(ks, KA, KB, KE, KW, KS, heat=heat)
     return reaction_model
 # print(test(1))
 

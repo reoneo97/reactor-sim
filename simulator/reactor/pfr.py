@@ -1,8 +1,10 @@
 import numpy as np
 import pandas as pd
+import math
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from loguru import logger
+from typing import Tuple
 
 from .. import const
 from ..reaction import ReactionModel
@@ -20,7 +22,7 @@ class IdealPFR(Reactor):
     def run(self, time_interval: float = 0.1, time_end: float = 300):
         # Setup an array to log concentration at every interval
 
-        self.ts = np.arange(0, time_end, time_interval)
+        ts = np.arange(0, time_end, time_interval)
         vol_n = int(self.vol//self.flow_rate) + 1
         self.vol_intervals, vol_step = np.linspace(
             0, self.vol, vol_n, retstep=True)
@@ -46,11 +48,11 @@ class IdealPFR(Reactor):
             [self.vol_intervals.reshape(-1, 1), conc_profile], axis=1)
         self.log(conc_profile)
 
-        for t in tqdm(self.ts[1:]):
+        for t in tqdm(ts[1:]):
             new_conc_profile = np.zeros(shape=(vol_n, 5))
             new_conc_profile[:, 0] = self.vol_intervals
 
-            # Concentrations from previous interval
+            # Initial V_0
             pa_conc, ipa_conc, ipp_conc, water_conc = conc_profile[0, 1:]
             rate = self.reaction.get_rate(
                 ca=pa_conc, cb=ipa_conc, ce=ipp_conc, cw=water_conc,
@@ -129,3 +131,55 @@ class IdealPFR(Reactor):
 
     def get_volume_intervals(self):
         return self.vol_intervals
+
+
+class RealPFR(Reactor):
+    def __init__(self,
+                 pa_feed: float, M: int,
+                 L: float, R: float, feed_temp: float, cooler_temp: float,
+                 space_interval: float = 100,
+                 **kwargs
+                 ):
+        self.pa_feed = pa_feed
+        self.M = M
+        self.L = L
+        self.R = R
+        self.feed_temp = feed_temp
+        self.cooler_temp = cooler_temp
+        self.cross_area = math.pi*R*R
+        self.heat_transfer_area = 2*math.pi*R*L
+        self.vol = self.cross_area*L
+        self.logs = []
+        self.space_interval = space_interval
+
+    def log(self, info):
+        """
+        Data is stored in a T x L x R x 6 Matrix
+            (Time x Length x Radius x Conc+Conversion)
+        """
+        self.logs.append(info)
+
+    def cylinder_area(self, r: float, dr: float, dz: float) -> Tuple[float, float]:
+        """
+        Helper function to calculate surface area of cylindrical rectangle for 
+        heat transfer calculations
+
+        Returns:
+        in_area: Heat transfer area for incoming conduction
+        out_area: Heat transfer area for outgoing conduction
+        """
+        return 2*math.pi*(r)*dz, 2*math.pi*(r+dr)*dz
+
+    def cylinder_vol(self, r, dr, dz):
+        """
+        Helper function to calculate volume of cylindrical rectangle
+        Formula = \pi*((r+dr)^2 -r^2)*dl
+        """
+
+        return 2*math.pi*r*dr*dz
+
+    def run(self, time_interval: float = 0.1, time_end: float = 300):
+        ts = np.arange(0, time_end, time_interval)
+        l_step = self.L/self.space_interval
+        r_step = self.R/self.space_interval
+        # Units of kmol/m3 -> mol/dm3

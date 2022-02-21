@@ -1,6 +1,6 @@
 # reactor-sim
 Repository for Final Year Design Project python simulation
-
+**Demo:** [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/reoneo97/reactor-sim/app.py)
 ## Task 
 Design a reactor for esterification of palmitic acid with isopropanol to produce isopropyl palmitate (IPP)
 
