@@ -151,6 +151,7 @@ class RealPFR(Reactor):
         self.vol = self.cross_area*L
         self.logs = []
         self.space_interval = space_interval
+        super().init_flow_rate()
 
     def log(self, info):
         """
@@ -181,5 +182,17 @@ class RealPFR(Reactor):
     def run(self, time_interval: float = 0.1, time_end: float = 300):
         ts = np.arange(0, time_end, time_interval)
         l_step = self.L/self.space_interval
+        ls = np.arange(0, self.L, self.space_interval)
         r_step = self.R/self.space_interval
+        r_s = np.arange(0, self.L, self.space_interval)
+
+        # Save volumes of cylindrical rectangles for faster calculation
+        vol_r_intervals = [self.cylinder_vol(r, r_step, l_step) for r in r_s]
+
         # Units of kmol/m3 -> mol/dm3
+        # pa_amt = vol_step/self.flow_rate*self.pa_feed
+        # ipa_amt = vol_step/self.flow_rate*self.ipa_feed
+        # ipp_amt = 0
+        # water_amt = 0
+    def calculate_cp():
+        pass
