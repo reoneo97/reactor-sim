@@ -1,5 +1,6 @@
 from .const import const_R
-from typing import List
+from typing import List, Iterable
+import numpy as np
 
 
 class HeatCapacity():
@@ -24,13 +25,14 @@ class MixedHeatCapacity():
     def __init__(self, c_ps: List[HeatCapacity]):
         self.c_ps = c_ps
 
-    def __call__(self, T: float, amts: List[float]) -> float:
+    def __call__(self, T: float, amts: np.array) -> float:
+
+        # assert len(amts) == len(self.c_ps), \
+        #     "There must be the same number of Cps as concentration. Currently" \
+        #     f" there are {len(amts)} C and {len(self.c_ps)} C_p values"
 
         cps = [c_p(T) for c_p in self.c_ps]
-        assert len(amts) == len(self.c_ps), \
-            "There must be the same number of Cps as concentration. Currently" \
-            f" there are {len(amts)} C and {len(self.c_ps)} C_p values"
-        final_cp = [conc*cp for conc, cp in zip(amts, cps)]
+        final_cp = sum(cps*amts)
         return final_cp
 
 

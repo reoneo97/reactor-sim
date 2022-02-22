@@ -30,6 +30,7 @@ def pbr():
         st.session_state["vol_intervals"] = None
 
     st.header("Ideal Packed Bed Reactor (PBR) Design")
+    st.subheader("[WIP] ⚠️ Not Completed!")
     st.markdown(
         """Ideal PFR design makes several assumptions:
 

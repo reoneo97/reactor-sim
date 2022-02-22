@@ -4,3 +4,4 @@ notebook/
 report.md
 *.xlsx
 test.py
+*.npy
