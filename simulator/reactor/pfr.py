@@ -1,18 +1,21 @@
 import numpy as np
 import pandas as pd
+import math
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from loguru import logger
+from typing import Tuple, List
 
 from .. import const
-from ..reaction import ReactionModel
+from ..reaction import ReactionModel, ptsa_reaction
 from ..reactor import Reactor
+from ..energy import mh_cp, MixedHeatCapacity
 
 
 class IdealPFR(Reactor):
     def __init__(self,
                  pa_feed: float, M: int, vol: float, temperature: float,
-                 rxn_model: ReactionModel):
+                 rxn_model: ReactionModel = ptsa_reaction):
         # Initial Setup in base model
         super().__init__(pa_feed, M, temperature, vol, rxn_model)
         self.init_logs()
@@ -20,7 +23,7 @@ class IdealPFR(Reactor):
     def run(self, time_interval: float = 0.1, time_end: float = 300):
         # Setup an array to log concentration at every interval
 
-        self.ts = np.arange(0, time_end, time_interval)
+        ts = np.arange(0, time_end, time_interval)
         vol_n = int(self.vol//self.flow_rate) + 1
         self.vol_intervals, vol_step = np.linspace(
             0, self.vol, vol_n, retstep=True)
@@ -33,6 +36,7 @@ class IdealPFR(Reactor):
 
         # Log initial concentration as class variable for conversion calculation
         self.initial_pa_conc = pa_amt/vol_step
+        print(self.initial_pa_conc, self.initial_pa_conc*self.M)
 
         # Logging the number of mol
 
@@ -46,11 +50,11 @@ class IdealPFR(Reactor):
             [self.vol_intervals.reshape(-1, 1), conc_profile], axis=1)
         self.log(conc_profile)
 
-        for t in tqdm(self.ts[1:]):
+        for t in tqdm(ts[1:]):
             new_conc_profile = np.zeros(shape=(vol_n, 5))
             new_conc_profile[:, 0] = self.vol_intervals
 
-            # Concentrations from previous interval
+            # Initial V_0
             pa_conc, ipa_conc, ipp_conc, water_conc = conc_profile[0, 1:]
             rate = self.reaction.get_rate(
                 ca=pa_conc, cb=ipa_conc, ce=ipp_conc, cw=water_conc,
@@ -129,3 +133,84 @@ class IdealPFR(Reactor):
 
     def get_volume_intervals(self):
         return self.vol_intervals
+
+
+class RealPFR(Reactor):
+    def __init__(self,
+                 pa_feed: float, M: int,
+                 L: float, R: float, feed_temp: float, cooler_temp: float,
+                 space_interval: float = 100, cp_model: MixedHeatCapacity = mh_cp,
+                 rxn_model: ReactionModel = ptsa_reaction,
+                 **kwargs
+                 ):
+        self.pa_feed = pa_feed
+        self.M = M
+        self.ipa_feed = pa_feed*M
+        self.L = L
+        self.R = R
+        self.feed_temp = feed_temp
+        self.cooler_temp = cooler_temp
+        self.cross_area = math.pi*R*R
+        self.heat_transfer_area = 2*math.pi*R*L
+        self.vol = self.cross_area*L
+        self.logs = []
+        self.space_interval = space_interval
+        self.cp_model = cp_model
+        super().init_flow_rate()
+
+    def log(self, info):
+        """
+        Data is stored in a T x L x R x 7 Matrix
+            (Time x Radius x Length  x Conc+Conversion + Temp)
+        """
+        self.logs.append(info)
+
+    def cylinder_area(self, r: float, dr: float, dz: float) -> Tuple[float, float]:
+        """
+        Helper function to calculate surface area of cylindrical rectangle for 
+        heat transfer calculations
+
+        Returns:
+        in_area: Heat transfer area for incoming conduction
+        out_area: Heat transfer area for outgoing conduction
+        """
+        return 2*math.pi*(r)*dz, 2*math.pi*(r+dr)*dz
+
+    def cylinder_vol(self, r, dr, dz):
+        """
+        Helper function to calculate volume of cylindrical rectangle
+        Formula = \pi*((r+dr)^2 -r^2)*dl
+        """
+
+        return 2*math.pi*r*dr*dz
+
+    def run(self, time_interval: float = 0.1, time_end: float = 300):
+        ts = np.arange(0, time_end, time_interval)
+        l_step = self.L/self.space_interval
+        ls = np.arange(0, self.L, self.space_interval)
+        r_step = self.R/self.space_interval
+        r_s = np.arange(0, self.L, self.space_interval)
+
+        # Save volumes of cylindrical rectangles for faster calculation
+        vol_r_intervals = [self.cylinder_vol(r, r_step, l_step) for r in r_s]
+        # Save volumes of flow_rates
+        norm_vol = [i/sum(vol_r_intervals) for i in vol_r_intervals]
+        flow_rate_intervals = [i*self.flow_rate for i in norm_vol]
+
+        pa_conc_init = self.pa_feed/self.flow_rate
+        ipa_conc_init = self.ipa_feed/self.flow_rate
+
+        logger.info(pa_conc_init, ipa_conc_init)
+        water_conc_init = 0
+        ipp_conc_init = 0
+        la_conc_init = 0
+        temp = self.feed_temp
+        # Units of kmol/m3 -> mol/dm3
+        # pa_amt = vol_step/self.flow_rate*self.pa_feed
+        # ipa_amt = vol_step/self.flow_rate*self.ipa_feed
+        # ipp_amt = 0
+        # water_amt = 0
+
+    def calculate_cp(self, amts: List[float], T: float):
+        cp = self.cp_model(T, amts)
+        return cp

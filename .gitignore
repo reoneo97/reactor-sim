@@ -3,3 +3,4 @@ notebook/
 *.csv
 report.md
 *.xlsx
+test.py

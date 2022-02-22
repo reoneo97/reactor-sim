@@ -12,7 +12,15 @@ class IdealCSTR(Reactor):
     def __init__(self,
                  pa_feed: float, M: int, vol: float, temperature: float,
                  rxn_model: ReactionModel):
-        # Initial Setup in base model
+        """Init Function for Ideal Isothermal Reactor Design 
+
+        Args:
+            pa_feed (float): Feed in kmol/min
+            M (int): Molar Ratio - Ratio of amt IPA to amt PA 
+            vol (float): Volume of Reactor for Sizing
+            temperature (float): Temperature of reactor 
+            rxn_model (ReactionModel): Reaction Model to be used
+        """
         super().__init__(pa_feed, M, temperature, vol, rxn_model)
 
     def run(self, time_interval: float = 0.1, time_end: float = 300.):
