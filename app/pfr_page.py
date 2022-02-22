@@ -44,7 +44,7 @@ def pfr():
     st.subheader("Choosing Design Parameters:")
 
     temp = st.slider("Temperature (K)", min_value=350., max_value=480.)
-    pa_feed = st.slider("Palmitic Acid Feed (mol//min)",
+    pa_feed = st.slider("Palmitic Acid Feed (kmol//min)",
                         min_value=10., max_value=1000.)
     M = st.slider("Molar Ratio (Isopropyl Alcohol/Palmitic Acid)",
                   min_value=1, max_value=25)

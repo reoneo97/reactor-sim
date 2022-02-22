@@ -4,17 +4,18 @@ import math
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from loguru import logger
-from typing import Tuple
+from typing import Tuple, List
 
 from .. import const
-from ..reaction import ReactionModel
+from ..reaction import ReactionModel, ptsa_reaction
 from ..reactor import Reactor
+from ..energy import mh_cp, MixedHeatCapacity
 
 
 class IdealPFR(Reactor):
     def __init__(self,
                  pa_feed: float, M: int, vol: float, temperature: float,
-                 rxn_model: ReactionModel):
+                 rxn_model: ReactionModel = ptsa_reaction):
         # Initial Setup in base model
         super().__init__(pa_feed, M, temperature, vol, rxn_model)
         self.init_logs()
@@ -35,6 +36,7 @@ class IdealPFR(Reactor):
 
         # Log initial concentration as class variable for conversion calculation
         self.initial_pa_conc = pa_amt/vol_step
+        print(self.initial_pa_conc, self.initial_pa_conc*self.M)
 
         # Logging the number of mol
 
@@ -137,11 +139,13 @@ class RealPFR(Reactor):
     def __init__(self,
                  pa_feed: float, M: int,
                  L: float, R: float, feed_temp: float, cooler_temp: float,
-                 space_interval: float = 100,
+                 space_interval: float = 100, cp_model: MixedHeatCapacity = mh_cp,
+                 rxn_model: ReactionModel = ptsa_reaction,
                  **kwargs
                  ):
         self.pa_feed = pa_feed
         self.M = M
+        self.ipa_feed = pa_feed*M
         self.L = L
         self.R = R
         self.feed_temp = feed_temp
@@ -151,12 +155,13 @@ class RealPFR(Reactor):
         self.vol = self.cross_area*L
         self.logs = []
         self.space_interval = space_interval
+        self.cp_model = cp_model
         super().init_flow_rate()
 
     def log(self, info):
         """
-        Data is stored in a T x L x R x 6 Matrix
-            (Time x Length x Radius x Conc+Conversion)
+        Data is stored in a T x L x R x 7 Matrix
+            (Time x Radius x Length  x Conc+Conversion + Temp)
         """
         self.logs.append(info)
 
@@ -188,11 +193,24 @@ class RealPFR(Reactor):
 
         # Save volumes of cylindrical rectangles for faster calculation
         vol_r_intervals = [self.cylinder_vol(r, r_step, l_step) for r in r_s]
+        # Save volumes of flow_rates
+        norm_vol = [i/sum(vol_r_intervals) for i in vol_r_intervals]
+        flow_rate_intervals = [i*self.flow_rate for i in norm_vol]
 
+        pa_conc_init = self.pa_feed/self.flow_rate
+        ipa_conc_init = self.ipa_feed/self.flow_rate
+
+        logger.info(pa_conc_init, ipa_conc_init)
+        water_conc_init = 0
+        ipp_conc_init = 0
+        la_conc_init = 0
+        temp = self.feed_temp
         # Units of kmol/m3 -> mol/dm3
         # pa_amt = vol_step/self.flow_rate*self.pa_feed
         # ipa_amt = vol_step/self.flow_rate*self.ipa_feed
         # ipp_amt = 0
         # water_amt = 0
-    def calculate_cp():
-        pass
+
+    def calculate_cp(self, amts: List[float], T: float):
+        cp = self.cp_model(T, amts)
+        return cp

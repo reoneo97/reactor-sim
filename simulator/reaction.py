@@ -126,7 +126,8 @@ class LHHWReaction(ReactionModel):
 
     def __init__(self, ks: ArrheniusEquation, KA: EquilibriumReaction,
                  KB: EquilibriumReaction, KE: EquilibriumReaction,
-                 KW: EquilibriumReaction, KS: EquilibriumReaction):
+                 KW: EquilibriumReaction, KS: EquilibriumReaction,
+                 heat: float):
 
         self.ks = ks
         self.KA = KA
@@ -134,6 +135,7 @@ class LHHWReaction(ReactionModel):
         self.KE = KE
         self.KW = KW
         self.KS = KS
+        self.heat = heat
 
     def get_rate(self, ca, cb, ce, cw,  T):
         assert all([i >= 0 for i in [ca, cb, ce, cw, T]]

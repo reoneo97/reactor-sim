@@ -6,6 +6,15 @@ class Reactor:
     def __init__(self,
                  pa_feed: float, M: int, temperature: float, vol: float = None,
                  rxn_model: ReactionModel = None):
+        """_summary_
+
+        Args:
+            pa_feed (float): pa feed in kmol/min
+            M (int): _description_
+            temperature (float): _description_
+            vol (float, optional): _description_. Defaults to None.
+            rxn_model (ReactionModel, optional): _description_. Defaults to None.
+        """
         self.temperature = temperature
         self.pa_feed = pa_feed
         self.M = M
