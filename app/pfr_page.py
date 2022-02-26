@@ -44,12 +44,13 @@ def pfr():
     st.subheader("Choosing Design Parameters:")
 
     temp = st.slider("Temperature (K)", min_value=350., max_value=480.)
-    pa_feed = st.slider("Palmitic Acid Feed (kmol//min)",
-                        min_value=10., max_value=1000.)
+    pa_feed_hr = st.slider("Palmitic Acid Feed (kmol//hr)",
+                           min_value=1., max_value=100., value=80.31)
+    pa_feed = pa_feed_hr/60
     M = st.slider("Molar Ratio (Isopropyl Alcohol/Palmitic Acid)",
                   min_value=1, max_value=25)
     vol = st.slider("Reactor Volume", min_value=1.,
-                    max_value=1e5, step=0.5)
+                    max_value=5e3, step=0.5)
 
     st.write("Using Default Simulation of 100 min in 0.1 min timesteps")
     time_interval = 0.1
@@ -80,9 +81,5 @@ def pfr():
             conversion_slc = conversion[time_index, :]
             conversion_plot(
                 conversion_slc, st.session_state["vol_intervals"], time_slider)
-            # Calculate the Time Interval
-            # Plot the Concentration Profile
-            # Print out the outlet concentration
-            # Find the volume value where
 
     st.markdown("---")

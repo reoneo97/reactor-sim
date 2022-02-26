@@ -1,5 +1,5 @@
 import streamlit as st
-from simulator.reaction import ptsa_reaction, ReactionModel
+# from simulator.reaction import ptsa_reaction, ReactionModel
 import simulator.const as const
 from simulator.reactor import IdealCSTR, IdealPFR
 from loguru import logger
@@ -12,8 +12,9 @@ with st.sidebar:
 
     st.header("Page Navigation")
     pg = st.radio("Page Selection",
-                  options=["PFR Tuning (p-TSA)",
-                           "PBR Tuning (ZnA/SG)"],
+                  options=["Ideal PFR (p-TSA)",
+                           "Ideal PBR (ZnA/SG)",
+                           "Real PFR"],
                   )
 
 

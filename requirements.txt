@@ -1,7 +1,7 @@
-loguru==0.5.3
-pandas==1.2.4
-numpy==1.20.3
-plotly==4.14.3
-streamlit==1.4.0
-matplotlib==3.3.4
-tqdm==4.61.0
+loguru>=0.5.3
+pandas>=1.2.4
+numpy>=1.20.3
+plotly>=4.14.3
+streamlit>=1.4.0
+matplotlib>=3.3.4
+tqdm>=4.61.0

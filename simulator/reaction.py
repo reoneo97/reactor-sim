@@ -109,13 +109,16 @@ class HomogeneousReaction(ReactionModel):
         reactant_concs = [ca, cb]
         product_concs = [ce, cw]
 
-        # First convert the reaction rates to s^-1
+        # First convert the reaction rates to s^-1 from h^-1
         forward_rate = self.forward.get_rate(reactant_concs, T)/3600
         backward_rate = self.backward.get_rate(product_concs, T)/3600
         net_rate = forward_rate - backward_rate
         if heat:
             return net_rate, -net_rate*self.heat  # Endothermic Reaction will consume heat
         return net_rate
+
+    def get_heat(self):
+        return -self.heat
 
 
 class LHHWReaction(ReactionModel):
@@ -163,7 +166,7 @@ def __get_ptsa_reaction():
     # Reaction Constants are given in units of h^-1
     forward = Reaction(150241, 40770, [1, 1])
     backward = Reaction(7.1166, 13128.3, [1, 1])
-    heat = 7984
+    heat = 7984  # kJ mol
     rxn_model = HomogeneousReaction(forward, backward, heat=heat)
     # print(rxn_model.get_rate([1, 100], [1, 1], 500))
     return rxn_model

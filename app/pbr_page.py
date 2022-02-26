@@ -32,7 +32,7 @@ def pbr():
     st.header("Ideal Packed Bed Reactor (PBR) Design")
     st.subheader("[WIP] ⚠️ Not Completed!")
     st.markdown(
-        """Ideal PFR design makes several assumptions:
+        """Ideal PBR design makes several assumptions:
 
         1. Concentration profile within the PFR is radially uniform
         2. Reactor is perfectly isothermal 

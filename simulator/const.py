@@ -15,4 +15,4 @@ zna_pore_diameter = 2.578e-9
 
 # Energy Balance
 
-k_e = 0.1199e-3  # Average Thermal Conductivity for Solution
+k_e = 0.1199e-3 * 100  # Average Thermal Conductivity for Solution

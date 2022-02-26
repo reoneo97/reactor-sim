@@ -12,6 +12,8 @@ from ..reaction import ReactionModel, ptsa_reaction
 from ..reactor import Reactor
 from ..energy import mh_cp, MixedHeatCapacity
 
+UPPER_BOUND = 1e5
+
 
 class IdealPFR(Reactor):
     def __init__(self,
@@ -208,14 +210,15 @@ class RealPFR(Reactor):
         dz = self.L/self.space_interval
         l_s = np.linspace(dz, self.L, self.space_interval)
         dr = self.R/self.space_interval
-        r_s = np.linspace(dr, self.L, self.space_interval)
+        r_s = np.linspace(dr, self.R, self.space_interval)
 
         # Save volumes of cylindrical rectangles for faster calculation
         vol_r_intervals = [self.cylinder_vol(r, dr, dz) for r in r_s]
-
+        area_z_intervals = [self.cylinder_area_z(r, dr) for r in r_s]
+        norm_area = [i/sum(area_z_intervals) for i in area_z_intervals]
         # Save volumes of flow_rates
         norm_vol = [i/sum(vol_r_intervals) for i in vol_r_intervals]
-        flow_rate_intervals = [i*self.flow_rate for i in norm_vol]
+        flow_rate_intervals = [i*self.flow_rate for i in norm_area]
 
         # Initial State of PFR at t=0
         feed_temp = self.feed_temp
@@ -234,7 +237,7 @@ class RealPFR(Reactor):
         ])
         init_data = np.tile(
             init_data_slc, [self.space_interval, self.space_interval, 1])
-
+        self.log(init_data)
         # Save Previous Data point for calculations
         prev_data_t = init_data
         # Running Simulation from t=1 onwards
@@ -246,37 +249,54 @@ class RealPFR(Reactor):
 
                 # Storing slice of concentrations/ temp from prev radial segment z_{i-1}
                 if i == 0:
-                    prev_data_l = init_data[0, :, :]
+                    prev_data_l = init_data[0, :, :].copy()
                 else:
-                    prev_data_l = new_data[i-1, :, :]
+                    prev_data_l = new_data[i-1, :, :].copy()
 
                 for j, r in enumerate(r_s):
                     # Fetch Values for Calculation
                     slc_vol = vol_r_intervals[j]
                     slc_flow_rate = flow_rate_intervals[j]
-                    slc_molar_flow = norm_vol[j]*self.molar_flow_rate
+
+                    slc_molar_flow = norm_area[j]*self.molar_flow_rate
 
                     prev_data_slc_l = prev_data_l[j, :]
                     prev_data_slc_t = prev_data_t[i, j, :]
+                    # logger.info(prev_data_slc_l)
 
                     in_area_r, out_area_r = self.cylinder_area_r(
                         r, dr, dz)
                     area_z = self.cylinder_area_z(r, dr)
                     # Obtaining parameters from same section but at t=i-1
                     init_temp, pa_conc, ipa_conc, ipp_conc, water_conc, la_conc = prev_data_slc_t
+                    concs = [pa_conc, ipa_conc, ipp_conc, water_conc]
+                    try:
+                        assert all([i >= 0 for i in concs]
+                                   ), "Concentrations should be positive"
+                    except:
+                        logger.warning(concs)
+                        raise AssertionError("Simulation Error")
+                        # Mass Balance
+                    try:
+                        rate = self.reaction.get_rate(
+                            ca=pa_conc, cb=ipa_conc, ce=ipp_conc, cw=water_conc,
+                            T=init_temp
+                        )*60
+                        heat = self.reaction.get_heat()
+                        dn = rate*slc_vol*time_interval
+                        rxn_heat = heat*dn
+                        assert abs(dn) < UPPER_BOUND, "Simulation Error"
+                        # print(t, i, j, rxn_heat, init_temp)
+                    except Exception as e:
+                        print()
+                        print(e)
+                        print(t, i, j, init_temp)
+                        quit()
+                    # Rate converted from /s to /min
 
-                    # Mass Balance
-                    rate, rxn_heat = self.reaction.get_rate(
-                        ca=pa_conc, cb=ipa_conc, ce=ipp_conc, cw=water_conc,
-                        T=init_temp, heat=True
-                    )
-                    # Rate converted from /h to /min
-                    rate = rate*60
                     # v_o/V  (C_{z-1,t} - C_{z,t-1})
                     conv_term = slc_flow_rate/slc_vol * \
                         (prev_data_slc_l[1:6] - prev_data_slc_t[1:6])
-
-                    # print(slc_flow_rate, slc_vol)
                     dc = conv_term.copy()
                     # PA and IPA, stoichiometric coefficient of -1
                     dc[:2] -= rate
@@ -288,6 +308,23 @@ class RealPFR(Reactor):
 
                     # ?: Should be able to merge the below lines
                     c_t = prev_data_slc_t[1:6] + dcdt
+
+                    try:
+                        assert all([i >= 0 for i in c_t]
+                                   ), "Concentrations should be positive"
+                    except:
+
+                        logger.error(c_t)
+                        logger.warning(f"Error at {t} {i} {j}")
+                        logger.warning(slc_flow_rate/slc_vol)
+                        logger.warning(prev_data_slc_l[1:6])
+                        logger.warning(prev_data_slc_t[1:6])
+                        logger.warning(conv_term)
+                        logger.warning(rate)
+                        logger.warning(dc)
+                        logger.warning(dcdt)
+                        raise AssertionError("Simulation Error")
+                        # Mass Balance
                     new_data[i, j, 1:6] = c_t
                     # Energy Balance
                     amts = c_t*slc_vol
@@ -306,7 +343,7 @@ class RealPFR(Reactor):
                     if j == self.space_interval-1:
                         # TODO: Find the Heat Transfer Coefficient for HEater TEmp
                         cond_r_out = (self.heater_temp -
-                                      init_temp)/dr * out_area_r * const.k_e * 20
+                                      init_temp)/dr * out_area_r * const.k_e * 50
                     else:
                         cond_r_out = (
                             prev_data_t[i, j+1, 0] - init_temp)/dr * out_area_r * const.k_e
@@ -325,24 +362,55 @@ class RealPFR(Reactor):
                     dt = dtdz*dz
                     conv_net = slc_molar_flow * cp * dt
                     # print(cond_z, cond_r_in, cond_r_out, conv_net, rxn_heat)
+                    # Cond r_out is positive and cond_r_in is also positive
+                    dhdt = cond_z - cond_r_in + cond_r_out - conv_net + rxn_heat
+                    # if t == ts[-1] and l == l_s[20]:
+                    #     logger.info("Special Log")
+                    #     logger.info(dhdt)
+                    #     logger.info(conv_net)
+                    #     logger.info(cond_z)
 
-                    dhdt = cond_z + cond_r_in - cond_r_out - conv_net + rxn_heat
                     dh = dhdt*time_interval
 
                     temp_change = dh/cp
                     # logger.debug(f"Temp Change: {temp_change}")
                     new_data[i, j, 0] = init_temp + temp_change
-                    # Finding C_p of incoming slice
-                    # Convection Term should be negative and is expected that dT/dz is negative
+                    if new_data[i, j, 0] <= 0:
+                        logger.error(c_t)
+                        logger.warning(
+                            f"Error at T={t:3f} Z={l_s[i]:3f} R={r_s[j]:3f}")
+                        logger.warning(prev_data_slc_l[0:6])
+                        logger.warning(prev_data_slc_t[0:6])
+                        logger.warning(conv_term)
+                        logger.warning(rate)
+                        logger.warning(dc)
+                        logger.warning(dcdt)
+                        raise AssertionError(
+                            "Simulation Error - Temperature Negative")
 
             self.log(new_data)
             prev_data_t = new_data.copy()
 
-        all_data = np.array(self.logs)
-        logger.debug(all_data.shape)
-        return all_data
+        self.all_data = np.array(self.logs)
+        logger.debug(self.all_data.shape)
+        return self.all_data
 
     def calculate_cp(self, T: float, amts):
         # C_p values are in units of
         cp = self.cp_model(T, amts)
         return cp
+
+    def get_dimensions(self,):
+        dz = self.L/self.space_interval
+        l_s = np.linspace(dz, self.L, self.space_interval)
+        dr = self.R/self.space_interval
+        r_s = np.linspace(dr, self.R, self.space_interval)
+        return l_s, r_s
+
+    def get_radial_volumes(self):
+        dz = self.L/self.space_interval
+        dr = self.R/self.space_interval
+        r_s = np.linspace(dr, self.R, self.space_interval)
+        vol_r_intervals = [self.cylinder_vol(r, dr, dz) for r in r_s]
+        vol_sum = sum(vol_r_intervals)
+        return np.array([i/vol_sum for i in vol_r_intervals])
