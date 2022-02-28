@@ -17,7 +17,7 @@ class IdealCSTR(Reactor):
         Args:
             pa_feed (float): Feed in kmol/min
             M (int): Molar Ratio - Ratio of amt IPA to amt PA 
-            vol (float): Volume of Reactor for Sizing
+            vol (float): Volume of Reactor for Sizing (m3)
             temperature (float): Temperature of reactor 
             rxn_model (ReactionModel): Reaction Model to be used
         """
@@ -38,6 +38,7 @@ class IdealCSTR(Reactor):
         ipp_amt = 0
         water_amt = 0
 
+        # Units of kmol/m3 -> mol/dm3
         pa_conc = pa_amt/self.vol
         # Log initial concentration as class variable for conversion calculation
         self.initial_pa_conc = pa_conc

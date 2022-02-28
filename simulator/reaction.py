@@ -33,6 +33,7 @@ class Reaction:
         Args:
             T (float): Temperature
         """
+        assert T > 0, "Temperature has to be positive"
         exp_term = -self.E_a/(const_R*T)
         return self.A*exp(exp_term)
 
@@ -101,20 +102,23 @@ class HomogeneousReaction(ReactionModel):
     def __init__(self, forward_rxn: Reaction, backward_rxn: Reaction, heat: float):
         self.forward = forward_rxn
         self.backward = backward_rxn
-        self.heat = heat
+        self.heat = heat  # Units of kJ/kmol
 
     def get_rate(self, ca: float, cb: float, ce: float, cw: float, T: float, heat=False):
 
         reactant_concs = [ca, cb]
         product_concs = [ce, cw]
 
-        # First convert the reaction rates to s^-1
+        # First convert the reaction rates to s^-1 from h^-1
         forward_rate = self.forward.get_rate(reactant_concs, T)/3600
         backward_rate = self.backward.get_rate(product_concs, T)/3600
         net_rate = forward_rate - backward_rate
         if heat:
-            return net_rate, net_rate*self.heat
+            return net_rate, -net_rate*self.heat  # Endothermic Reaction will consume heat
         return net_rate
+
+    def get_heat(self):
+        return -self.heat
 
 
 class LHHWReaction(ReactionModel):
@@ -162,7 +166,7 @@ def __get_ptsa_reaction():
     # Reaction Constants are given in units of h^-1
     forward = Reaction(150241, 40770, [1, 1])
     backward = Reaction(7.1166, 13128.3, [1, 1])
-    heat = 7984
+    heat = 7984  # kJ mol
     rxn_model = HomogeneousReaction(forward, backward, heat=heat)
     # print(rxn_model.get_rate([1, 100], [1, 1], 500))
     return rxn_model
@@ -176,7 +180,7 @@ def __get_zna_reaction():
     KW = EquilibriumReaction(3.4822796e-16, 88018.49)
     ks = ArrheniusEquation(1257.925, 41589.037)
     KS = EquilibriumReaction(75074.872, -32827.8428)
-    heat = 7984
+    heat = 7984e3
     reaction_model = LHHWReaction(ks, KA, KB, KE, KW, KS, heat=heat)
     return reaction_model
 # print(test(1))
