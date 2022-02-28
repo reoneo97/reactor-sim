@@ -7,3 +7,7 @@ def operating_cost():
 
 def capital_cost():
     pass
+
+
+def profit():
+    

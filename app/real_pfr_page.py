@@ -28,7 +28,6 @@ def conversion_mean_plot(conversion_slc, vol_weights, z_axis, r_axis, time):
 
 def temperature_mean_plot(temp_slc, vol_weights, z_axis, r_axis, time):
     norm_T = temp_slc@vol_weights
-    st.write(norm_T.shape)
     df = pd.DataFrame([z_axis, norm_T]).T
     # norm_temp = temp_slc*vol_weights
     df.columns = ["Length/Z-Axis (m)", "Temperature"]
@@ -108,9 +107,12 @@ def real_pfr():
                       max_value=10., step=0.05, value=1.25)
         space_interval = st.slider(
             "Space Interval", min_value=51, max_value=101, step=50,)
+        time_end = st.slider(
+            "Simulation Time End", min_value=100., max_value=300., step=50.
+        )
 
     time_interval = 0.1
-    time_end = 100.
+    # time_end = 100.
     sim_btn = st.button("Run Simulation")
     if sim_btn:
         model = RealPFR(pa_feed, M, L, R, feed_temp, heat_temp, space_interval)
@@ -139,7 +141,7 @@ def real_pfr():
 
             time_index = min(int(time_slider/time_interval),
                              len(simulation_data)-1)
-            st.write(time_index)
+
             data_slc = simulation_data[time_index, :]
             plot_col1, _, plot_col2 = st.columns([8, 1, 8])
             z_axis = st.session_state["z_axis"]
@@ -169,4 +171,23 @@ def real_pfr():
                 conversion_mean_plot(
                     conv_slc, vol_weights, z_axis, r_axis, time_slider)
             vol_weights = st.session_state["vol_weights"]
-            st.write(vol_weights)
+
+            st.markdown("---")
+            st.subheader("Reactor Output Information")
+
+            output_slc = simulation_data[len(simulation_data)-1, -1, :, :]
+            output_temp_slc = output_slc[:, 0]
+            output_conc_slc = output_slc[:, 1:6]
+
+            output_temp = output_temp_slc@vol_weights
+            output_concs = output_conc_slc.T@vol_weights
+            output_conversion = output_slc[:, -1]@vol_weights
+            output_df = pd.DataFrame(
+                [output_concs],
+                columns=[
+                    "Palmitic Acid Concentration", "IPA Concentration",
+                    "IPP Concentration", "Water Concentration",
+                    "Linoleic Acid Concentration"])
+            st.write(output_df)
+            st.write(f"Output Temperature: {output_temp:.2f}K")
+            st.write(f"Output Conversion: {output_conversion:.3f}")

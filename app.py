@@ -12,10 +12,11 @@ with st.sidebar:
 
     st.header("Page Navigation")
     pg = st.radio("Page Selection",
-                  options=["Ideal PFR (p-TSA)",
-                           "Ideal PBR (ZnA/SG)",
-                           "Real PFR"],
-                  )
+                  options=[
+                      "Real PFR",
+                      "Ideal PFR (p-TSA)",
+                      "Ideal PBR (ZnA/SG)",
+                  ])
 
 
 def project_header():
