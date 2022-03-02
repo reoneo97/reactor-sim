@@ -342,6 +342,7 @@ class RealPFR(Reactor):
 
                     if j == self.space_interval-1:
                         # TODO: Find the Heat Transfer Coefficient for HEater TEmp
+                        # TODO: Should remove the dr, since this is not a conduction and there is no KE
                         cond_r_out = (self.heater_temp -
                                       init_temp)/dr * out_area_r * const.k_e * 50
                     else:
@@ -392,7 +393,7 @@ class RealPFR(Reactor):
             prev_data_t = new_data.copy()
 
         self.all_data = np.array(self.logs)
-        logger.debug(self.all_data.shape)
+        self.calculate_output_conversion()
         return self.all_data
 
     def calculate_cp(self, T: float, amts):
@@ -414,3 +415,9 @@ class RealPFR(Reactor):
         vol_r_intervals = [self.cylinder_vol(r, dr, dz) for r in r_s]
         vol_sum = sum(vol_r_intervals)
         return np.array([i/vol_sum for i in vol_r_intervals])
+
+    def calculate_output_conversion(self):
+        output_slc = self.all_data[-1, -1, :, :]
+        vol_weights = self.get_radial_volumes()
+        self.output_conversion = output_slc[:, -1]@vol_weights
+        logger.debug(f"Output Conversion: {self.output_conversion}")

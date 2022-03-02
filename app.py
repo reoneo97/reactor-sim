@@ -13,7 +13,7 @@ with st.sidebar:
     st.header("Page Navigation")
     pg = st.radio("Page Selection",
                   options=[
-                      "Real PFR",
+                      "Real PFR - Isothermal",
                       "Ideal PFR (p-TSA)",
                       "Ideal PBR (ZnA/SG)",
                   ])

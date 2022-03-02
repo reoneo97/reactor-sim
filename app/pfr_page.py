@@ -49,11 +49,11 @@ def pfr():
     pa_feed = pa_feed_hr/60
     M = st.slider("Molar Ratio (Isopropyl Alcohol/Palmitic Acid)",
                   min_value=1, max_value=25)
-    vol = st.slider("Reactor Volume", min_value=1.,
-                    max_value=5e3, step=0.5)
+    vol = st.slider("Reactor Volume", min_value=0.5,
+                    max_value=100, step=0.5)
 
     st.write("Using Default Simulation of 100 min in 0.1 min timesteps")
-    time_interval = 0.1
+    time_interval = 0.05
     time_end = 200.
     sim_btn = st.button("Run Simulation")
     if sim_btn:
