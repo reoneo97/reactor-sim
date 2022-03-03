@@ -28,7 +28,7 @@ k_e = 0.1199e-3 * 100  # Average Thermal Conductivity for Solution
 ipa_cost = 3  # USD/kg
 ipp_cost = 475  # USD/kg
 
-lps_cost = 5.56e-3
+lps_cost = 5.56e-3 #USD/kg
 
 
 jacket_reactor_a = 53000

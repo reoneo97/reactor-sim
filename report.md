@@ -1,5 +1,8 @@
+# Executive Summary
 
-# Introduction
+
+
+# 1. Introduction
 
 ## Task 
 Design a reactor for esterification of palmitic acid with isopropanol to produce isopropyl palmitate (IPP)
@@ -78,7 +81,7 @@ Metrics
     - Use Counter Current heating
     - To simplify the calculation, we can first fix the temperature at the outermost radial slice. Given that radial slice, the heat profile should be the same. 
     - 
-Parameters
+    Parameters
 ## Energy Balance Equations
 
 ## Report Bookmarks
@@ -115,6 +118,10 @@ $$
 \end{aligned}
 $$
 
+## Heating Energy Balance
+$$
+\dot{m}C_p(T_{z-1}-T)_z) - 2\pi R\Delta z(T_z - T_{R,z}) = \dot{m}C_p\frac{\Delta T}{\Delta t} \\ 
+\Delta t\bigg [ T_{z-1}-T_z -\frac{2\pi R \Delta z }{\dot{m}C_p}(T_z - T_{r,z}\bigg] = \Delta T$$
 
 ## Assumption Validity
 - Error analysis portion that looks at whether some of the assumptions being amde are valid or not. 
@@ -145,4 +152,4 @@ Low Pressure Steam occurs at 6 bar - Don't want large pressure differences due t
 
 Dimpled Jacket - However, their one weakness is fatigue failure if subjected to rapid thermal cycling, which typically happens if the same jacket is quickly switched from a heating mode to a cooling mode or vice versa.
 
-4500 W/M2C  
+4000 W/M2C - Conservative estimate   

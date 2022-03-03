@@ -7,7 +7,7 @@ from . import const as const
 def operating_cost(reactor: RealPFR):
 
     ptsa_loading = reactor.flow_rate/1000*5  # m^3/ min - 5g dm3/min
-    ptsa_cost_min = ptsa_loading*const.ptsa_cost_per_g
+    ptsa_cost = ptsa_loading*const.ptsa_cost_per_g
 
     ipa_feed = reactor.ipa_feed  # kmol/min
     ipa_wt_rate = ipa_feed*const.ipa_wt  # kg/min
@@ -15,6 +15,7 @@ def operating_cost(reactor: RealPFR):
 
     conversion = reactor.output_conversion
     ipp_out = reactor.pa_feed*conversion
+    ipp_profit = ipp_out*const.ipp_cost
 
     pass
 

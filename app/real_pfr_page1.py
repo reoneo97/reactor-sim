@@ -101,6 +101,9 @@ def real_pfr_iso():
                               min_value=293., max_value=480., value=393.)
         heat_temp = st.slider("Heater Temperature (K)",
                               min_value=373., max_value=523., value=433.15)
+        heat_flow_rate_hr = st.slider("Steam Flow Rate (kg/hr)")
+        heat_flow_rate = heat_flow_rate_hr/60
+
     with col2:
         st.markdown("#### Reactor Dimensions")
         L = st.slider("Reactor Length", min_value=0.1,
@@ -126,7 +129,8 @@ def real_pfr_iso():
     st.write("Simulation for Real PFR can take up to 5 minutes.")
     sim_btn = st.button("Run Simulation")
     if sim_btn:
-        model = RealPFR(pa_feed, M, L, R, feed_temp, heat_temp, space_interval)
+        model = RealPFR(pa_feed, M, L, R, feed_temp, heat_temp,
+                        heat_flow_rate, space_interval)
         with st.spinner("Running Simulation"):
             sim_data = model.run(time_interval, time_end)
 

@@ -142,6 +142,7 @@ class RealPFR(Reactor):
     def __init__(self,
                  pa_feed: float, M: int,
                  L: float, R: float, feed_temp: float, heater_temp: float,
+                 heater_flow_rate: float,
                  space_interval: float = 101, cp_model: MixedHeatCapacity = mh_cp,
                  rxn_model: ReactionModel = ptsa_reaction,
                  **kwargs
@@ -152,6 +153,7 @@ class RealPFR(Reactor):
         self.L = L
         self.R = R
         self.feed_temp = feed_temp
+        self.heater_flow_rate = heater_flow_rate  # kg/min
         self.heater_temp = heater_temp
         self.cross_area = math.pi*R*R
         self.heat_transfer_area = 2*math.pi*R*L
@@ -344,7 +346,7 @@ class RealPFR(Reactor):
                         # TODO: Find the Heat Transfer Coefficient for HEater TEmp
                         # TODO: Should remove the dr, since this is not a conduction and there is no KE
                         cond_r_out = (self.heater_temp -
-                                      init_temp)/dr * out_area_r * const.k_e * 50
+                                      init_temp) * out_area_r * 4000
                     else:
                         cond_r_out = (
                             prev_data_t[i, j+1, 0] - init_temp)/dr * out_area_r * const.k_e
