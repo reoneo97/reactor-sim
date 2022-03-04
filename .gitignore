@@ -1,7 +1,6 @@
 __pycache__
 notebook/
 *.csv
-report.md
 *.xlsx
 test.py
 *.npy

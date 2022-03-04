@@ -7,6 +7,8 @@ from loguru import logger
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
+import math
+import numpy as np
 
 
 def conversion_mean_plot(conversion_slc, vol_weights, z_axis, r_axis, time):
@@ -65,22 +67,34 @@ def temperature_contour(temp_slc, z_axis, r_axis):
     st.plotly_chart(fig)
 
 
-def real_pfr():
+def heater_requirement_plot(time, heat_flow):
+    df = pd.DataFrame([time, heat_flow, ]).T
+    df.columns = ["Time (min)", "Heating Requirement (kJ/min)"]
+    fig = px.line(
+        df, x="Time (min)", y="Heating Requirement (kJ/min)",
+        title=f"Heating Requirement Plot")
+    st.plotly_chart(fig)
+
+
+def real_pfr_iso():
 
     # Session State Variables
     if 'simulation_done' not in st.session_state:
         st.session_state['simulation_done'] = False
         st.session_state["simulation_data"] = None
         st.session_state["vol_intervals"] = None
+        st.session_state["sim_time_end"] = None
+        st.session_state["heater_flow"] = None
 
     st.header("Real PFR Design")
-    st.subheader("[WIP] ⚠️ Not Completed!")
+    # st.subheader("[WIP] ⚠️ Not Completed!")
     st.markdown(
         """Real PFR design makes several assumptions:
 
-            1. Concentration profile within the PFR is radially uniform
+            1. Velocity of Fluid is Radially uniform
             2. There is no back-mixing within the reactor
-            3. Heat transfer is radial
+            3. Heat transfer in radial direction is only limited to conduction. 
+            4. Energy loss from heating fluid to the surroundings is negligible
 
             """
     )
@@ -98,46 +112,80 @@ def real_pfr():
         feed_temp = st.slider("Feed Temperature (K)",
                               min_value=293., max_value=480., value=393.)
         heat_temp = st.slider("Heater Temperature (K)",
-                              min_value=373., max_value=523., value=420.)
+                              min_value=373., max_value=523., value=433.15)
+        heat_flow_rate_hr = st.slider("Steam Flow Rate (kg/hr)")
+        heat_flow_rate = heat_flow_rate_hr/60
+
     with col2:
         st.markdown("#### Reactor Dimensions")
         L = st.slider("Reactor Length", min_value=0.1,
-                      max_value=20., step=0.1, value=4.)
+                      max_value=25., step=0.1, value=4.)
         R = st.slider("Reactor Radius", min_value=0.05,
-                      max_value=10., step=0.05, value=1.25)
+                      max_value=5., step=0.05, value=1.25)
+        reactor_vol = L*math.pi*R*R
+        st.write(f"Volume: {reactor_vol}")
+        st.markdown("#### Simulation Parameters")
         space_interval = st.slider(
             "Space Interval", min_value=51, max_value=101, step=50,)
-        time_end = st.slider(
-            "Simulation Time End", min_value=100., max_value=300., step=50.
+        st.info(
+            "This is the number of intervals to divide the L and R Dimensions. "
+            "Larger space interval will reduce overall error but increase computational time by a factor of n^2"
         )
 
-    time_interval = 0.1
-    # time_end = 100.
+        time_end = st.slider(
+            "Simulation Time End", min_value=100., max_value=1000., step=50.
+        )
+
+    time_interval = 0.2
     sim_btn = st.button("Run Simulation")
     if sim_btn:
-        model = RealPFR(pa_feed, M, L, R, feed_temp, heat_temp, space_interval)
-        with st.spinner("Running Simulation"):
+        model = RealPFR(pa_feed, M, L, R, feed_temp, heat_temp,
+                        heat_flow_rate, space_interval)
+        with st.spinner("Running Simulation - Simulation for Real PFR can take up to 5 minutes."):
             sim_data = model.run(time_interval, time_end)
 
             st.session_state["simulation_done"] = True
             st.session_state["simulation_data"] = sim_data
+            st.session_state["sim_time_end"] = time_end
             ls, rs = model.get_dimensions()
             vol_weights = model.get_radial_volumes()
             st.session_state["z_axis"] = ls
             st.session_state["r_axis"] = rs
             st.session_state["vol_weights"] = vol_weights
+            st.session_state["heater_flow"] = model.get_heater_total() / \
+                time_interval  # Normalise to get in terms of kJ/min
 
     st.markdown("---")
-    st.write(st.session_state["simulation_done"])
 
     plot_container = st.container()
 
     with plot_container:
-        st.header("Conversion Visualization 📈")
         if st.session_state["simulation_done"]:
+            st.header("Reactor Output Information")
             simulation_data = st.session_state["simulation_data"]
+            vol_weights = st.session_state["vol_weights"]
+            output_slc = simulation_data[len(simulation_data)-1, -1, :, :]
+            output_temp_slc = output_slc[:, 0]
+            output_conc_slc = output_slc[:, 1:6]
+
+            output_temp = output_temp_slc@vol_weights
+            output_concs = output_conc_slc.T@vol_weights
+            output_conversion = output_slc[:, -1]@vol_weights
+            output_df = pd.DataFrame(
+                [output_concs],
+                columns=[
+                    "Palmitic Acid Concentration", "IPA Concentration",
+                    "IPP Concentration", "Water Concentration",
+                    "Linoleic Acid Concentration"])
+            st.write(output_df)
+            st.write(f"Output Temperature: {output_temp:.2f}K")
+            st.write(f"Output Conversion: {output_conversion:.3f}")
+
+            st.header("Conversion Visualization 📈")
+            st.markdown("---")
+            ts = np.arange(0, st.session_state["sim_time_end"], time_interval)
             time_slider = st.slider(
-                "Time Slider", 0., time_end, value=0., step=time_interval,)
+                "Time Slider", 0., st.session_state["sim_time_end"], value=0., step=time_interval,)
 
             time_index = min(int(time_slider/time_interval),
                              len(simulation_data)-1)
@@ -158,6 +206,7 @@ def real_pfr():
                 st.markdown("#### Average Temperature Line Plot")
                 temperature_mean_plot(
                     temp_slc, vol_weights, z_axis, r_axis, time_slider)
+                heater_requirement_plot(ts, st.session_state["heater_flow"])
             with plot_col2:
                 st.markdown("### **<ins>Conversion Plots</ins>**",
                             unsafe_allow_html=True)
@@ -170,24 +219,3 @@ def real_pfr():
                 st.markdown("#### Average Conversion Line Plot")
                 conversion_mean_plot(
                     conv_slc, vol_weights, z_axis, r_axis, time_slider)
-            vol_weights = st.session_state["vol_weights"]
-
-            st.markdown("---")
-            st.subheader("Reactor Output Information")
-
-            output_slc = simulation_data[len(simulation_data)-1, -1, :, :]
-            output_temp_slc = output_slc[:, 0]
-            output_conc_slc = output_slc[:, 1:6]
-
-            output_temp = output_temp_slc@vol_weights
-            output_concs = output_conc_slc.T@vol_weights
-            output_conversion = output_slc[:, -1]@vol_weights
-            output_df = pd.DataFrame(
-                [output_concs],
-                columns=[
-                    "Palmitic Acid Concentration", "IPA Concentration",
-                    "IPP Concentration", "Water Concentration",
-                    "Linoleic Acid Concentration"])
-            st.write(output_df)
-            st.write(f"Output Temperature: {output_temp:.2f}K")
-            st.write(f"Output Conversion: {output_conversion:.3f}")
