@@ -8,6 +8,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import math
+import numpy as np
 
 
 def conversion_mean_plot(conversion_slc, vol_weights, z_axis, r_axis, time):
@@ -66,6 +67,15 @@ def temperature_contour(temp_slc, z_axis, r_axis):
     st.plotly_chart(fig)
 
 
+def heater_requirement_plot(time, heat_flow):
+    df = pd.DataFrame([time, heat_flow, ]).T
+    df.columns = ["Time (min)", "Heating Requirement (kJ/min)"]
+    fig = px.line(
+        df, x="Time (min)", y="Heating Requirement (kJ/min)",
+        title=f"Heating Requirement Plot")
+    st.plotly_chart(fig)
+
+
 def real_pfr_iso():
 
     # Session State Variables
@@ -73,6 +83,8 @@ def real_pfr_iso():
         st.session_state['simulation_done'] = False
         st.session_state["simulation_data"] = None
         st.session_state["vol_intervals"] = None
+        st.session_state["sim_time_end"] = None
+        st.session_state["heater_flow"] = None
 
     st.header("Real PFR Design")
     # st.subheader("[WIP] ⚠️ Not Completed!")
@@ -121,26 +133,27 @@ def real_pfr_iso():
         )
 
         time_end = st.slider(
-            "Simulation Time End", min_value=100., max_value=300., step=50.
+            "Simulation Time End", min_value=100., max_value=1000., step=50.
         )
 
-    time_interval = 0.1
-    # time_end = 100.
-    st.write("Simulation for Real PFR can take up to 5 minutes.")
+    time_interval = 0.2
     sim_btn = st.button("Run Simulation")
     if sim_btn:
         model = RealPFR(pa_feed, M, L, R, feed_temp, heat_temp,
                         heat_flow_rate, space_interval)
-        with st.spinner("Running Simulation"):
+        with st.spinner("Running Simulation - Simulation for Real PFR can take up to 5 minutes."):
             sim_data = model.run(time_interval, time_end)
 
             st.session_state["simulation_done"] = True
             st.session_state["simulation_data"] = sim_data
+            st.session_state["sim_time_end"] = time_end
             ls, rs = model.get_dimensions()
             vol_weights = model.get_radial_volumes()
             st.session_state["z_axis"] = ls
             st.session_state["r_axis"] = rs
             st.session_state["vol_weights"] = vol_weights
+            st.session_state["heater_flow"] = model.get_heater_total() / \
+                time_interval  # Normalise to get in terms of kJ/min
 
     st.markdown("---")
 
@@ -170,9 +183,9 @@ def real_pfr_iso():
 
             st.header("Conversion Visualization 📈")
             st.markdown("---")
-
+            ts = np.arange(0, st.session_state["sim_time_end"], time_interval)
             time_slider = st.slider(
-                "Time Slider", 0., time_end, value=0., step=time_interval,)
+                "Time Slider", 0., st.session_state["sim_time_end"], value=0., step=time_interval,)
 
             time_index = min(int(time_slider/time_interval),
                              len(simulation_data)-1)
@@ -193,6 +206,7 @@ def real_pfr_iso():
                 st.markdown("#### Average Temperature Line Plot")
                 temperature_mean_plot(
                     temp_slc, vol_weights, z_axis, r_axis, time_slider)
+                heater_requirement_plot(ts, st.session_state["heater_flow"])
             with plot_col2:
                 st.markdown("### **<ins>Conversion Plots</ins>**",
                             unsafe_allow_html=True)

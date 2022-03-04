@@ -22,13 +22,14 @@ zna_pore_diameter = 2.578e-9
 
 # Energy Balance
 
-k_e = 0.1199e-3 * 100  # Average Thermal Conductivity for Solution
+k_e = 0.1199e-3 * 100   # Average Thermal Conductivity for Solution
+h_heater = 4  # Overall heat transfer coefficient kW/m^2 K
 
 # Costs
 ipa_cost = 3  # USD/kg
 ipp_cost = 475  # USD/kg
 
-lps_cost = 5.56e-3 #USD/kg
+lps_cost = 5.56e-3  # USD/kg
 
 
 jacket_reactor_a = 53000

@@ -210,7 +210,7 @@ class RealPFR(Reactor):
         ts = np.arange(0, time_end, time_interval)
 
         dz = self.L/self.space_interval
-        l_s = np.linspace(dz, self.L, self.space_interval)
+        l_s = np.linspace(0, self.L, self.space_interval)
         dr = self.R/self.space_interval
         r_s = np.linspace(dr, self.R, self.space_interval)
 
@@ -232,6 +232,9 @@ class RealPFR(Reactor):
         ipp_conc_init = 0
         la_conc_init = 0
 
+        # Storing the amount of heat required from the heating fluid at every time interval
+        self.heater_total = np.zeros(shape=(len(ts)))
+
         # Initial Data Slc is the feed conditions which will be used for the first radial slice
         init_data_slc = np.array([
             feed_temp, pa_conc_init, ipa_conc_init, ipp_conc_init, water_conc_init,
@@ -243,10 +246,10 @@ class RealPFR(Reactor):
         # Save Previous Data point for calculations
         prev_data_t = init_data
         # Running Simulation from t=1 onwards
-        for t in tqdm(ts[1:]):
+        for i_t, t in enumerate(tqdm(ts[1:])):
             new_data = np.zeros(
                 shape=(self.space_interval, self.space_interval, 6))
-
+            heater_heat_out = 0
             for i, l in enumerate(l_s):
 
                 # Storing slice of concentrations/ temp from prev radial segment z_{i-1}
@@ -272,13 +275,14 @@ class RealPFR(Reactor):
                     # Obtaining parameters from same section but at t=i-1
                     init_temp, pa_conc, ipa_conc, ipp_conc, water_conc, la_conc = prev_data_slc_t
                     concs = [pa_conc, ipa_conc, ipp_conc, water_conc]
-                    try:
-                        assert all([i >= 0 for i in concs]
-                                   ), "Concentrations should be positive"
-                    except:
-                        logger.warning(concs)
-                        raise AssertionError("Simulation Error")
-                        # Mass Balance
+                    # try:
+                    #     assert all([i >= 0 for i in concs]
+                    #                ), "Concentrations should be positive"
+                    # except:
+                    #     logger.warning(concs)
+                    #     raise AssertionError(
+                    #         "Simulation Error - Negative Concentration")
+                    # Mass Balance
                     try:
                         rate = self.reaction.get_rate(
                             ca=pa_conc, cb=ipa_conc, ce=ipp_conc, cw=water_conc,
@@ -317,7 +321,8 @@ class RealPFR(Reactor):
                     except:
 
                         logger.error(c_t)
-                        logger.warning(f"Error at {t} {i} {j}")
+                        logger.warning(f"Error at T={t} {i} {j}")
+                        logger.warning(f"Temp is {init_temp}")
                         logger.warning(slc_flow_rate/slc_vol)
                         logger.warning(prev_data_slc_l[1:6])
                         logger.warning(prev_data_slc_t[1:6])
@@ -337,7 +342,8 @@ class RealPFR(Reactor):
                     # logger.warning(f"{in_area_r}, {out_area_r}")
                     # Conduction Terms - Radial Direction
                     if j == 0:
-                        cond_r_in = 0
+                        cond_r_in = (feed_temp - init_temp) / \
+                            dr * in_area_r * const.k_e
                     else:
                         cond_r_in = (
                             prev_data_l[j-1, 0] - init_temp)/dr * in_area_r * const.k_e
@@ -346,7 +352,8 @@ class RealPFR(Reactor):
                         # TODO: Find the Heat Transfer Coefficient for HEater TEmp
                         # TODO: Should remove the dr, since this is not a conduction and there is no KE
                         cond_r_out = (self.heater_temp -
-                                      init_temp) * out_area_r * 4000
+                                      init_temp) * out_area_r * const.h_heater
+                        heater_heat_out += cond_r_out
                     else:
                         cond_r_out = (
                             prev_data_t[i, j+1, 0] - init_temp)/dr * out_area_r * const.k_e
@@ -366,7 +373,7 @@ class RealPFR(Reactor):
                     conv_net = slc_molar_flow * cp * dt
                     # print(cond_z, cond_r_in, cond_r_out, conv_net, rxn_heat)
                     # Cond r_out is positive and cond_r_in is also positive
-                    dhdt = cond_z - cond_r_in + cond_r_out - conv_net + rxn_heat
+                    dhdt = cond_z + cond_r_in + cond_r_out - conv_net + rxn_heat
                     # if t == ts[-1] and l == l_s[20]:
                     #     logger.info("Special Log")
                     #     logger.info(dhdt)
@@ -378,20 +385,28 @@ class RealPFR(Reactor):
                     temp_change = dh/cp
                     # logger.debug(f"Temp Change: {temp_change}")
                     new_data[i, j, 0] = init_temp + temp_change
-                    if new_data[i, j, 0] <= 0:
+                    if new_data[i, j, 0] <= 200:
                         logger.error(c_t)
                         logger.warning(
                             f"Error at T={t:3f} Z={l_s[i]:3f} R={r_s[j]:3f}")
                         logger.warning(prev_data_slc_l[0:6])
                         logger.warning(prev_data_slc_t[0:6])
-                        logger.warning(conv_term)
-                        logger.warning(rate)
-                        logger.warning(dc)
-                        logger.warning(dcdt)
-                        raise AssertionError(
-                            "Simulation Error - Temperature Negative")
+                        logger.warning(
+                            "cond_z | cond_r_in | cond_r_out | conv_net | rxn_heat")
+                        logger.warning(
+                            f"{cond_z:.3f}| {cond_r_in:.3f} | {cond_r_out:.3f} | {conv_net:.3f} | {rxn_heat:.3f}")
+                        logger.warning(f"Temp Change: {temp_change}")
+                        logger.error(
+                            "Terminating Simulation - Temperature Negative")
+                        self.log(new_data)
+                        prev_data_t = new_data.copy()
+
+                        self.all_data = np.array(self.logs)
+                        self.calculate_output_conversion()
+                        return self.all_data
 
             self.log(new_data)
+            self.heater_total[i_t+1] = heater_heat_out
             prev_data_t = new_data.copy()
 
         self.all_data = np.array(self.logs)
@@ -423,3 +438,6 @@ class RealPFR(Reactor):
         vol_weights = self.get_radial_volumes()
         self.output_conversion = output_slc[:, -1]@vol_weights
         logger.debug(f"Output Conversion: {self.output_conversion}")
+
+    def get_heater_total(self):
+        return self.heater_total
