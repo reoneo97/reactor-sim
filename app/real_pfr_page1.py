@@ -108,35 +108,38 @@ def real_pfr_iso():
                                min_value=1., max_value=100., value=80.31)
         pa_feed = pa_feed_hr/60
         M = st.slider("Molar Ratio (Isopropyl Alcohol/Palmitic Acid)",
-                      min_value=1, max_value=25, value=5)
+                      min_value=1., max_value=15., value=5., step=0.1)
         feed_temp = st.slider("Feed Temperature (K)",
                               min_value=293., max_value=480., value=393.)
         heat_temp = st.slider("Heater Temperature (K)",
                               min_value=373., max_value=523., value=433.15)
-        heat_flow_rate_hr = st.slider("Steam Flow Rate (kg/hr)")
-        heat_flow_rate = heat_flow_rate_hr/60
+        n_reactor = st.slider("Number of Parallel Reactors", min_value = 1, max_value = 4, step=1)
+        
 
     with col2:
         st.markdown("#### Reactor Dimensions")
         L = st.slider("Reactor Length", min_value=0.1,
                       max_value=25., step=0.1, value=4.)
-        R = st.slider("Reactor Radius", min_value=0.05,
+        R = st.slider("Reactor Radius", min_value=0.25,
                       max_value=5., step=0.05, value=1.25)
         reactor_vol = L*math.pi*R*R
         st.write(f"Volume: {reactor_vol}")
         st.markdown("#### Simulation Parameters")
-        space_interval = st.slider(
-            "Space Interval", min_value=51, max_value=101, step=50,)
+        space_interval = 51
         st.info(
             "This is the number of intervals to divide the L and R Dimensions. "
             "Larger space interval will reduce overall error but increase computational time by a factor of n^2"
         )
 
+        time_interval = st.slider(
+            "Time Step for Simulation", min_value=0.05, max_value=0.2, step=0.05)
+        st.info("If the simulation is having issues, reduce the timestep")
         time_end = st.slider(
             "Simulation Time End", min_value=100., max_value=1000., step=50.
         )
 
-    time_interval = 0.2
+    st.write(
+        f"Performing Simulation with Time Interval of {time_interval} min")
     sim_btn = st.button("Run Simulation")
     if sim_btn:
         model = RealPFR(pa_feed, M, L, R, feed_temp, heat_temp,
