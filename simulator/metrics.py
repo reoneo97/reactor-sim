@@ -3,8 +3,25 @@ from . import const as const
 # Metrics
 # Calculation of different optimization metrics
 
+# Fixed cost that will not change based on operating conditions
+FIXED_COST = 0
+
 
 def operating_cost(reactor: RealPFR):
+    """Function to calculate the operating cost that is required 
+
+    Args:
+        reactor (RealPFR): PFR Reactor object
+    """
+    # Pre-Reactor Costing
+    # feed_P =
+    # Condense Feed Stream into Liquid
+
+    # Pumping of IPA
+
+    # Pumping of Feed
+
+    # Heating of IPA and Feed Mixture
 
     # Calculating Chemical Cost
     ipa_feed = reactor.ipa_feed*60  # kmol/min -> kmol/hr
@@ -21,14 +38,34 @@ def operating_cost(reactor: RealPFR):
     ipp_out_wt = ipp_out * const.ipp_wt # kmol/hr -> kg/hr
     ipp_profit = ipp_out*const.ipp_cost  # kg/hr * 8000 hr/yr = kg/year
 
+<<<<<<< HEAD
     # Calculating Duty Cost
     mix_temp, cp = calculate_props_after_mixing(ipa_feed)
     preheat_duty = (feed_temp - mix_temp)*cp  # /hr cost
     preheat_cost = preheat_duty*8000/const.mps_cost_gj
     # Calculating Capital Cost
+=======
+    # Separation Calculations
+
+    # Cool Feed Down to Separation Conditions
+
+    # Heating Requirement
+
+    pass
 
 
-def capital_cost():
+def find_P(T: float):
+    """Find pressure of feed required for the temperature
+
+    Args:
+        T (float): Desired temperature of the feed
+    """
+    pass
+>>>>>>> 82d70495e51eb800809d946a27aa7b3e4917a522
+
+
+def capital_cost(reactor: RealPFR, n_split: int):
+
     pass
 
 
