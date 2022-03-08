@@ -113,8 +113,8 @@ def real_pfr_iso():
                               min_value=293., max_value=480., value=393.)
         heat_temp = st.slider("Heater Temperature (K)",
                               min_value=373., max_value=523., value=433.15)
-        n_reactor = st.slider("Number of Parallel Reactors", min_value = 1, max_value = 4, step=1)
-        
+        n_reactor = st.slider("Number of Parallel Reactors",
+                              min_value=1, max_value=4, step=1)
 
     with col2:
         st.markdown("#### Reactor Dimensions")
@@ -125,7 +125,7 @@ def real_pfr_iso():
         reactor_vol = L*math.pi*R*R
         st.write(f"Volume: {reactor_vol}")
         st.markdown("#### Simulation Parameters")
-        space_interval = 51
+        space_interval = 26
         st.info(
             "This is the number of intervals to divide the L and R Dimensions. "
             "Larger space interval will reduce overall error but increase computational time by a factor of n^2"
@@ -142,8 +142,7 @@ def real_pfr_iso():
         f"Performing Simulation with Time Interval of {time_interval} min")
     sim_btn = st.button("Run Simulation")
     if sim_btn:
-        model = RealPFR(pa_feed, M, L, R, feed_temp, heat_temp,
-                        heat_flow_rate, space_interval)
+        model = RealPFR(pa_feed, M, L, R, feed_temp, heat_temp, space_interval)
         with st.spinner("Running Simulation - Simulation for Real PFR can take up to 5 minutes."):
             sim_data = model.run(time_interval, time_end)
 

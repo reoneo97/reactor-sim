@@ -17,9 +17,8 @@ def operating_cost(reactor: RealPFR):
     # feed_P =
     # Condense Feed Stream into Liquid
 
-    # Pumping of IPA
-
     # Pumping of Feed
+    # This part is largely insignificatn
 
     # Heating of IPA and Feed Mixture
 
@@ -34,17 +33,10 @@ def operating_cost(reactor: RealPFR):
     ipa_opex = ipa_wt_rate*const.ipa_cost*8000  # kg/hr * 8000 hr/yr = kg/year
 
     conversion = reactor.output_conversion
-    ipp_out = reactor.pa_feed*conversion*60 #kmol/min -> kmol/hr
-    ipp_out_wt = ipp_out * const.ipp_wt # kmol/hr -> kg/hr
+    ipp_out = reactor.pa_feed*conversion*60  # kmol/min -> kmol/hr
+    ipp_out_wt = ipp_out * const.ipp_wt  # kmol/hr -> kg/hr
     ipp_profit = ipp_out*const.ipp_cost  # kg/hr * 8000 hr/yr = kg/year
 
-<<<<<<< HEAD
-    # Calculating Duty Cost
-    mix_temp, cp = calculate_props_after_mixing(ipa_feed)
-    preheat_duty = (feed_temp - mix_temp)*cp  # /hr cost
-    preheat_cost = preheat_duty*8000/const.mps_cost_gj
-    # Calculating Capital Cost
-=======
     # Separation Calculations
 
     # Cool Feed Down to Separation Conditions
@@ -61,7 +53,6 @@ def find_P(T: float):
         T (float): Desired temperature of the feed
     """
     pass
->>>>>>> 82d70495e51eb800809d946a27aa7b3e4917a522
 
 
 def capital_cost(reactor: RealPFR, n_split: int):
