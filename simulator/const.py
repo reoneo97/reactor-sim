@@ -30,7 +30,21 @@ ipa_cost = 3  # USD/kg
 ipp_cost = 475  # USD/kg
 
 lps_cost = 5.56e-3  # USD/kg
+lps_cost_gj = 4.54  # $/GJ
+mps_cost_gj = 4.77  # $/GJ
+rw_cost = 0.185e-3  # USD/kg
 
 
 jacket_reactor_a = 53000
 jacket_reactor_b = 28000
+
+# Calculate Temperature after mixing
+feed_1_mass_flow = 2712
+feed_1_cp = 2.204
+feed_1_temp = 45
+
+feed_5_mass_flow = 18810
+feed_5_cp = 2.132
+feed_5_temp = 30.07
+
+ipa_cp = 4507.5
