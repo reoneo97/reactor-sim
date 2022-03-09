@@ -142,7 +142,6 @@ class RealPFR(Reactor):
     def __init__(self,
                  pa_feed: float, M: int,
                  L: float, R: float, feed_temp: float, heater_temp: float,
-                 heater_flow_rate: float,
                  space_interval: float = 101, cp_model: MixedHeatCapacity = mh_cp,
                  rxn_model: ReactionModel = ptsa_reaction,
                  **kwargs
@@ -153,7 +152,6 @@ class RealPFR(Reactor):
         self.L = L
         self.R = R
         self.feed_temp = feed_temp
-        self.heater_flow_rate = heater_flow_rate  # kg/min
         self.heater_temp = heater_temp
         self.cross_area = math.pi*R*R
         self.heat_transfer_area = 2*math.pi*R*L
@@ -163,6 +161,7 @@ class RealPFR(Reactor):
         self.cp_model = cp_model
         self.reaction = rxn_model
         super().init_flow_rate()
+        self.velocity = self.flow_rate/self.cross_area
 
     def log(self, info):
         """
@@ -263,7 +262,7 @@ class RealPFR(Reactor):
                     slc_vol = vol_r_intervals[j]
                     slc_flow_rate = flow_rate_intervals[j]
 
-                    slc_molar_flow = norm_area[j]*self.molar_flow_rate
+                    slc_molar_flow = norm_area[j]*self.flow_rate
 
                     prev_data_slc_l = prev_data_l[j, :]
                     prev_data_slc_t = prev_data_t[i, j, :]
