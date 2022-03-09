@@ -1,5 +1,6 @@
 from simulator.reactor.pfr import RealPFR
 from . import const as const
+import math
 # Metrics
 # Calculation of different optimization metrics
 
@@ -7,15 +8,16 @@ from . import const as const
 FIXED_COST = 0
 
 
-def operating_cost(reactor: RealPFR):
-    """Function to calculate the operating cost that is required 
+def operating_cost(reactor: RealPFR, time_interval: float):
+    """Function to calculate the operating cost that is required. Note that this
+    function only considers the costs which have a large impact on the reactor
+    Some costs like pumping cost are excluded from optimization as they have 
+    relatively negligible cost and cannot be explicity computed without using Hysys
 
     Args:
         reactor (RealPFR): PFR Reactor object
     """
     # Pre-Reactor Costing
-    # feed_P =
-    # Condense Feed Stream into Liquid
 
     # Pumping of Feed
     # This part is largely insignificatn
@@ -37,12 +39,9 @@ def operating_cost(reactor: RealPFR):
     ipp_out_wt = ipp_out * const.ipp_wt  # kmol/hr -> kg/hr
     ipp_profit = ipp_out*const.ipp_cost  # kg/hr * 8000 hr/yr = kg/year
 
-    # Separation Calculations
-
-    # Cool Feed Down to Separation Conditions
-
     # Heating Requirement
-
+    ss_heater_flow = reactor.get_heater_total()[-1]
+    ss_heater_flow = ss_heater_flow/time_interval * 60  # kJ/h
     pass
 
 
@@ -93,3 +92,17 @@ def calculate_props_after_mixing(ipa_feed,):
     final_temp = heat_total/cp
 
     return final_temp, cp
+
+
+def get_shell_mass(L, D, thickness, rho=8000):
+    return math.pi*L*D * thickness*rho
+
+
+def pressure_drop(L, D, velocity: float, e: float):
+    rel_rough = e/D
+    # Calculating reynolds number
+
+    re = velocity*D/const.feed_viscosity
+    t4 = (7.149/re) ^ 0.8981
+    t3 = (rel_rough ^ 1.1098)/2.857
+    t_34 = math.log(t3+t4, 10)

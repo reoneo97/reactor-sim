@@ -142,6 +142,7 @@ def real_pfr_iso():
         f"Performing Simulation with Time Interval of {time_interval} min")
     sim_btn = st.button("Run Simulation")
     if sim_btn:
+        global model
         model = RealPFR(pa_feed, M, L, R, feed_temp, heat_temp, space_interval)
         with st.spinner("Running Simulation - Simulation for Real PFR can take up to 5 minutes."):
             sim_data = model.run(time_interval, time_end)
@@ -182,7 +183,8 @@ def real_pfr_iso():
             st.write(output_df)
             st.write(f"Output Temperature: {output_temp:.2f}K")
             st.write(f"Output Conversion: {output_conversion:.3f}")
-
+            if model:
+                st.write(f"Fluid Velocity: {model.velocity}")
             st.header("Conversion Visualization 📈")
             st.markdown("---")
             ts = np.arange(0, st.session_state["sim_time_end"], time_interval)

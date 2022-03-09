@@ -22,8 +22,8 @@ zna_pore_diameter = 2.578e-9
 
 # Energy Balance
 
-k_e = 0.1199e-3 * 100   # Average Thermal Conductivity for Solution
-h_heater = 4  # Overall heat transfer coefficient kW/m^2 K
+k_e = 0.1399e-3 * 100   # Average Thermal Conductivity for Solution
+h_heater = 4*60  # Overall heat transfer coefficient kJ/min/m^2 K
 
 # Costs
 ipa_cost = 3  # USD/kg
@@ -37,6 +37,7 @@ rw_cost = 0.185e-3  # USD/kg
 
 jacket_reactor_a = 53000
 jacket_reactor_b = 28000
+jacket_reactor_n = 0.8
 
 # Calculate Temperature after mixing
 feed_1_mass_flow = 2712
@@ -48,3 +49,11 @@ feed_5_cp = 2.132
 feed_5_temp = 30.07
 
 ipa_cp = 4507.5
+
+feed_viscosity = 1.507e-4
+
+
+# Pressure Drop
+rough_cast_iron = 0.25e-3
+rough_galv_iron = 0.15e-3
+rough_steel = 0.046e-3

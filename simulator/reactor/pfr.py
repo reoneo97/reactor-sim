@@ -161,6 +161,7 @@ class RealPFR(Reactor):
         self.cp_model = cp_model
         self.reaction = rxn_model
         super().init_flow_rate()
+        self.velocity = self.flow_rate/self.cross_area
 
     def log(self, info):
         """
@@ -261,7 +262,7 @@ class RealPFR(Reactor):
                     slc_vol = vol_r_intervals[j]
                     slc_flow_rate = flow_rate_intervals[j]
 
-                    slc_molar_flow = norm_area[j]*self.molar_flow_rate
+                    slc_molar_flow = norm_area[j]*self.flow_rate
 
                     prev_data_slc_l = prev_data_l[j, :]
                     prev_data_slc_t = prev_data_t[i, j, :]
