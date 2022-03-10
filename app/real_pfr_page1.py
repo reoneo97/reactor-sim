@@ -126,14 +126,9 @@ def real_pfr_iso():
         st.write(f"Volume: {reactor_vol}")
         st.markdown("#### Simulation Parameters")
         space_interval = 26
-        st.info(
-            "This is the number of intervals to divide the L and R Dimensions. "
-            "Larger space interval will reduce overall error but increase computational time by a factor of n^2"
-        )
-
         time_interval = st.slider(
             "Time Step for Simulation", min_value=0.05, max_value=0.2, step=0.05)
-        st.info("If the simulation is having issues, reduce the timestep")
+        st.info("If the simulation is having issues, reduce the timestep. However this will increase simulation time")
         time_end = st.slider(
             "Simulation Time End", min_value=100., max_value=1000., step=50.
         )
@@ -184,7 +179,11 @@ def real_pfr_iso():
             st.write(f"Output Temperature: {output_temp:.2f}K")
             st.write(f"Output Conversion: {output_conversion:.3f}")
             if model:
-                st.write(f"Fluid Velocity: {model.velocity}")
+                st.write(f"Fluid Velocity: {model.velocity:.3f} m/min")
+                st.write(
+                    f"Volumetric Flow Rate: {model.flow_rate:.3f} m3/min")
+            st.write(
+                f"Heat Flow Rate: {st.session_state['heater_flow'][-1]*60:.3f} kJ/hr")
             st.header("Conversion Visualization 📈")
             st.markdown("---")
             ts = np.arange(0, st.session_state["sim_time_end"], time_interval)
