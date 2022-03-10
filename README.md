@@ -20,10 +20,12 @@ To add in design metrics (other than conversion) such as costs, purity, heat rec
    - Fluid friction factors
    - Drag force based on material
    - Calculate Pressure Drop - Can become a metric
-5. Mass Balance
-   - No idea why this will be an issue but can look at textbook to see 
-6. Side Reactions
-   - Kinetics for Linoeic Acid
+5. Find a way to perform costing for pumping 
+
+Hysys 
+1. Find out preprocessing items and how to do costing for OPEX and CAPEX
+2. Find ideal conditions, 
+
 ## How to Run:
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/reoneo97/reactor-sim/app.py) for an older version of the build. 
 
