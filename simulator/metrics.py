@@ -1,3 +1,4 @@
+from typing import final
 from simulator.reactor.pfr import RealPFR
 from . import const as const
 import math
@@ -19,14 +20,24 @@ def operating_cost(reactor: RealPFR, time_interval: float):
     """
     # Pre-Reactor Costing
 
-    # Pumping of Feed
-    # This part is largely insignificatn
+    ipa_feed = reactor.ipa_feed*60  # kmol/min -> kmol/hr
+    conversion = reactor.output_conversion
 
+    ipp_recovery = 1  # How much IPP can be obtained at 99 % purity after separation
+    # Pumping of Feed
+    pump_feed_duty = 13.19  # kW for whole feed
+    pump_ipa_duty = 0.0413*ipa_feed  # kW, reactor feed
+    pump_duty = pump_feed_duty + pump_ipa_duty
+    pump_duty_annual = pump_duty * 3600 * 8000  # kJ/hr
+    pump_duty_opex = pump_duty_annual/1e6 * const.electricity_cost
     # Heating of IPA and Feed Mixture
 
+    # Feed_cp here is in terms of kJ/ C instead of kJ/kmol C. Dont need to multiply with anything
+    final_temp, feed_cp = calculate_props_after_mixing(ipa_feed)
     # Calculating Chemical Cost
-    ipa_feed = reactor.ipa_feed*60  # kmol/min -> kmol/hr
     feed_temp = reactor.feed_temp
+    preheat_duty = (feed_temp - final_temp)*feed_cp
+    preheat_cost = preheat_duty*8000/1e6*const.mps_cost_gj
 
     ptsa_loading = reactor.flow_rate/1000*5  # m^3/ min -> 5g dm3/min
     ptsa_cost = ptsa_loading*const.ptsa_cost_per_g
@@ -34,14 +45,19 @@ def operating_cost(reactor: RealPFR, time_interval: float):
     ipa_wt_rate = ipa_feed*const.ipa_wt  # kg/hr
     ipa_opex = ipa_wt_rate*const.ipa_cost*8000  # kg/hr * 8000 hr/yr = kg/year
 
-    conversion = reactor.output_conversion
     ipp_out = reactor.pa_feed*conversion*60  # kmol/min -> kmol/hr
     ipp_out_wt = ipp_out * const.ipp_wt  # kmol/hr -> kg/hr
-    ipp_profit = ipp_out*const.ipp_cost  # kg/hr * 8000 hr/yr = kg/year
+    ipp_profit = ipp_out_wt*const.ipp_cost * \
+        ipp_recovery  # kg/hr * 8000 hr/yr = kg/year
 
     # Heating Requirement
     ss_heater_flow = reactor.get_heater_total()[-1]
     ss_heater_flow = ss_heater_flow/time_interval * 60  # kJ/h
+    ss_heater_flow_annual = ss_heater_flow*8000 / 1e6  # GJ
+    ss_heater_cost = ss_heater_flow_annual*const.mps_cost_gj
+
+    # Calculation of IPA disposal
+    ipa_dispose = (1-conversion)
     pass
 
 
@@ -65,10 +81,10 @@ def profit():
 
 def calculate_props_after_mixing(ipa_feed,):
     """Helper function to calculate properties and cp of the feed after mixing
-
+    Assumes that C_p can be taken as constant over the interval
 
     Args:
-        ipa_feed (float): Molar flow of IPA into the reactor
+        ipa_feed (float): Molar flow of IPA into the reactor. kmol/hr
     """
     ipa_feed_wt = ipa_feed*const.ipa_wt
 
@@ -106,3 +122,8 @@ def pressure_drop(L, D, velocity: float, e: float):
     t4 = (7.149/re) ^ 0.8981
     t3 = (rel_rough ^ 1.1098)/2.857
     t_34 = math.log(t3+t4, 10)
+
+
+def cepci(cepci=7.73):
+    # C2 = C1(I2/I1)
+    pass

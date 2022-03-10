@@ -22,7 +22,7 @@ zna_pore_diameter = 2.578e-9
 
 # Energy Balance
 
-k_e = 0.1399e-3 * 100   # Average Thermal Conductivity for Solution
+k_e = 0.1399e-3 * 60  # Average Thermal Conductivity for Solution
 h_heater = 4*60  # Overall heat transfer coefficient kJ/min/m^2 K
 
 # Costs
@@ -33,7 +33,7 @@ lps_cost = 5.56e-3  # USD/kg
 lps_cost_gj = 4.54  # $/GJ
 mps_cost_gj = 4.77  # $/GJ
 rw_cost = 0.185e-3  # USD/kg
-
+electricity_cost = 18.72  # $/GJ
 
 jacket_reactor_a = 53000
 jacket_reactor_b = 28000
@@ -57,3 +57,6 @@ feed_viscosity = 1.507e-4
 rough_cast_iron = 0.25e-3
 rough_galv_iron = 0.15e-3
 rough_steel = 0.046e-3
+
+U_liq_gas = 0.06  # kW/m2K
+U_liq_liq = 0.28  # kW/m2K
