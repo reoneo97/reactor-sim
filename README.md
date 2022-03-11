@@ -7,20 +7,18 @@ Design a reactor for esterification of palmitic acid with isopropanol to produce
 
 
 ## TODO:
-1. Metrics 
-To add in design metrics (other than conversion) such as costs, purity, heat recovered etc. This will allow for optimization to be conducted
-2. Heating Duty calculations
-   - Reaction Heat
-3. Non-isothermal consideration
+1. Jacket Costing and disposal costing  
+
+2. Non-isothermal consideration
    - Fluid Properties - Cp values for the various compounds
    - Interface Mass Transfer
    - Properties for heating vessel - Heat transfer coefficient
    - Solve for temperature profile
-4.  Momentum Balance
+3.  Momentum Balance
    - Fluid friction factors
    - Drag force based on material
    - Calculate Pressure Drop - Can become a metric
-5. Find a way to perform costing for pumping 
+5. Change LA to impurities
 
 Hysys 
 1. Find out preprocessing items and how to do costing for OPEX and CAPEX

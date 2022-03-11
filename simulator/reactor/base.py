@@ -46,5 +46,5 @@ class Reactor:
         ipa_wt = self.ipa_feed*const.ipa_wt
         ipa_flow = ipa_wt/const.ipa_density
         self.flow_rate = ipa_flow + pa_flow  # Volumetric Flow
-        self.velocity = self.flow_rate/self.cross_area
+
         self.molar_flow_rate = self.pa_feed + self.ipa_feed
