@@ -14,7 +14,7 @@ ipp_wt = 298.511
 
 ptsa_density = 1240
 ptsa_wt = 172.2
-ptsa_cost_per_g = 22500/1000/1000
+ptsa_cost_per_g = (225000/1000)/1000
 
 zna_particle_size = 32e-6
 zna_surface_area = 89.97  # m^2g^-1
@@ -22,8 +22,9 @@ zna_pore_diameter = 2.578e-9
 
 # Energy Balance
 
-k_e = 0.1399e-3 * 100   # Average Thermal Conductivity for Solution
-h_heater = 4*60  # Overall heat transfer coefficient kJ/min/m^2 K
+# Heat Transfer Coefficients
+k_e = 0.4399e-3 * 60  # Average Thermal Conductivity for Solution
+h_heater = 0.281*60  # Overall heat transfer coefficient kJ/min/m^2 K
 
 # Costs
 ipa_cost = 3  # USD/kg
@@ -33,7 +34,9 @@ lps_cost = 5.56e-3  # USD/kg
 lps_cost_gj = 4.54  # $/GJ
 mps_cost_gj = 4.77  # $/GJ
 rw_cost = 0.185e-3  # USD/kg
+electricity_cost = 18.72  # $/GJ
 
+mps_temp = 273.15+184
 
 jacket_reactor_a = 53000
 jacket_reactor_b = 28000
@@ -48,8 +51,6 @@ feed_5_mass_flow = 18810
 feed_5_cp = 2.132
 feed_5_temp = 30.07
 
-ipa_cp = 4507.5
-
 feed_viscosity = 1.507e-4
 
 
@@ -57,3 +58,16 @@ feed_viscosity = 1.507e-4
 rough_cast_iron = 0.25e-3
 rough_galv_iron = 0.15e-3
 rough_steel = 0.046e-3
+
+U_liq_gas = 0.06  # kW/m2K
+U_liq_liq = 0.28  # kW/m2K
+
+pv_304_a = 11000
+pv_304_b = 63
+pv_304_n = 0.85
+
+pv_stress_max = 6.8948*15  # psi
+pv_corr_allowance = 3  # mm
+pv_thick_min = 9  # mm
+
+steel_density = 8000

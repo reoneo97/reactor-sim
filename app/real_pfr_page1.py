@@ -3,6 +3,7 @@ import streamlit as st
 from simulator.reaction import ptsa_reaction, ReactionModel
 import simulator.const as const
 from simulator.reactor import RealPFR
+from simulator.metrics import total_cost
 from loguru import logger
 import plotly.express as px
 import plotly.graph_objects as go
@@ -85,6 +86,8 @@ def real_pfr_iso():
         st.session_state["vol_intervals"] = None
         st.session_state["sim_time_end"] = None
         st.session_state["heater_flow"] = None
+        st.session_state["model"] = None
+        st.session_state["costing"] = None
 
     st.header("Real PFR Design")
     # st.subheader("[WIP] ⚠️ Not Completed!")
@@ -115,6 +118,8 @@ def real_pfr_iso():
                               min_value=373., max_value=523., value=433.15)
         n_reactor = st.slider("Number of Parallel Reactors",
                               min_value=1, max_value=4, step=1)
+        # splitting the pa feed into n parallel reactors
+        pa_feed = pa_feed/n_reactor
 
     with col2:
         st.markdown("#### Reactor Dimensions")
@@ -125,9 +130,9 @@ def real_pfr_iso():
         reactor_vol = L*math.pi*R*R
         st.write(f"Volume: {reactor_vol}")
         st.markdown("#### Simulation Parameters")
-        space_interval = 26
+        space_interval = 51
         time_interval = st.slider(
-            "Time Step for Simulation", min_value=0.05, max_value=0.2, step=0.05)
+            "Time Step for Simulation", min_value=0.05, max_value=0.2, step=0.05, value=0.2)
         st.info("If the simulation is having issues, reduce the timestep. However this will increase simulation time")
         time_end = st.slider(
             "Simulation Time End", min_value=100., max_value=1000., step=50.
@@ -152,13 +157,17 @@ def real_pfr_iso():
             st.session_state["vol_weights"] = vol_weights
             st.session_state["heater_flow"] = model.get_heater_total() / \
                 time_interval  # Normalise to get in terms of kJ/min
+            st.session_state["model"] = model
+            st.session_state["costing"] = total_cost(
+                model, time_interval, n_reactor)
 
     st.markdown("---")
-
+    cost_container = st.container()
     plot_container = st.container()
 
     with plot_container:
         if st.session_state["simulation_done"]:
+            model = st.session_state["model"]
             st.header("Reactor Output Information")
             simulation_data = st.session_state["simulation_data"]
             vol_weights = st.session_state["vol_weights"]
@@ -176,14 +185,15 @@ def real_pfr_iso():
                     "IPP Concentration", "Water Concentration",
                     "Linoleic Acid Concentration"])
             st.write(output_df)
-            st.write(f"Output Temperature: {output_temp:.2f}K")
-            st.write(f"Output Conversion: {output_conversion:.3f}")
-            if model:
-                st.write(f"Fluid Velocity: {model.velocity:.3f} m/min")
-                st.write(
-                    f"Volumetric Flow Rate: {model.flow_rate:.3f} m3/min")
-            st.write(
-                f"Heat Flow Rate: {st.session_state['heater_flow'][-1]*60:.3f} kJ/hr")
+            info = f"""
+            Output Temperature: {output_temp:.2f}K \n
+            Output Conversion: {output_conversion:.3f} \n
+            Fluid Velocity: {model.velocity:.3f} m/min \n
+            Volumetric Flow Rate: {model.flow_rate:.3f} m3/min \n
+            Heat Flow Rate: {st.session_state['heater_flow'][-1]*60:.3f} kJ/hr
+            """
+            st.write(info)
+
             st.header("Conversion Visualization 📈")
             st.markdown("---")
             ts = np.arange(0, st.session_state["sim_time_end"], time_interval)
@@ -222,3 +232,6 @@ def real_pfr_iso():
                 st.markdown("#### Average Conversion Line Plot")
                 conversion_mean_plot(
                     conv_slc, vol_weights, z_axis, r_axis, time_slider)
+
+        if st.session_state["simulation_done"]:
+            st.write([st.session_state["costing"]])

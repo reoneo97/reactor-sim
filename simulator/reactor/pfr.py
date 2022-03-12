@@ -151,6 +151,7 @@ class RealPFR(Reactor):
         self.ipa_feed = pa_feed*M
         self.L = L
         self.R = R
+        self.D = R*2
         self.feed_temp = feed_temp
         self.heater_temp = heater_temp
         self.cross_area = math.pi*R*R
