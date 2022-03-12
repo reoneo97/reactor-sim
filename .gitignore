@@ -4,3 +4,4 @@ notebook/
 *.xlsx
 test.py
 *.npy
+.DS_Store
