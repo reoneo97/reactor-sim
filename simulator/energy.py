@@ -22,6 +22,10 @@ class HeatCapacity():
 
 
 class MixedHeatCapacity():
+    """
+    Class to perform C_p calculations with the assumption that there is no \Delta H_{mix}
+    This Heat Capacity class is used to 
+    """
     def __init__(self, c_ps: List[HeatCapacity]):
         self.c_ps = c_ps
 
