@@ -142,7 +142,7 @@ class RealPFR(Reactor):
     def __init__(self,
                  pa_feed: float, M: int,
                  L: float, R: float, feed_temp: float, heater_temp: float,
-                 space_interval: float = 101, cp_model: MixedHeatCapacity = mh_cp,
+                 space_interval: float = 26, cp_model: MixedHeatCapacity = mh_cp,
                  rxn_model: ReactionModel = ptsa_reaction,
                  **kwargs
                  ):
@@ -226,8 +226,8 @@ class RealPFR(Reactor):
         feed_temp = self.feed_temp
         pa_conc_init = self.initial_pa_conc = self.pa_feed/self.flow_rate
         ipa_conc_init = self.ipa_feed/self.flow_rate
-        logger.info(pa_conc_init)
-        logger.info(ipa_conc_init)
+        # logger.info(f"Initial PA Concentration: {pa_conc_init:.3f}")
+        # logger.info(f"Initial IPA Concentration: {ipa_conc_init:.3f}")
         water_conc_init = 0
         ipp_conc_init = 0
         la_conc_init = 0
@@ -438,6 +438,7 @@ class RealPFR(Reactor):
         vol_weights = self.get_radial_volumes()
         self.output_conversion = output_slc[:, -1]@vol_weights
         logger.debug(f"Output Conversion: {self.output_conversion}")
+        return self.output_conversion
 
     def get_heater_total(self):
         return self.heater_total

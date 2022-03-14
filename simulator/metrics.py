@@ -47,7 +47,7 @@ def total_cost(reactor: RealPFR, time_interval: float, n_reactor: int, cepci: in
     preheat_duty_kw = preheat_duty/3600  # Duty in KW
     preheat_cost = preheat_duty*8000/1e6*const.mps_cost_gj
 
-    ptsa_loading = reactor.flow_rate/1000*5  # m^3/ min -> 5g dm3/min
+    ptsa_loading = reactor.flow_rate*1000*5  # m^3/ min * 5 g/dm3 -> g/min
     ptsa_cost = ptsa_loading*60*8000*const.ptsa_cost_per_g*ptsa_recovery
 
     ipa_wt_rate = ipa_feed*const.ipa_wt  # kg/hr
@@ -70,7 +70,6 @@ def total_cost(reactor: RealPFR, time_interval: float, n_reactor: int, cepci: in
     ww_vol = reactor_flow_rate - ipp_vol
     logger.info(f"Wastewater Volume: {ww_vol:.3f} m3/min")
     ww_cost = wastewater_cost(ww_vol)
-    
 
     # Capital Cost Calculation
     heater_cc = get_heater_cc(inlet_temp, feed_temp, preheat_duty_kw)
@@ -84,13 +83,16 @@ def total_cost(reactor: RealPFR, time_interval: float, n_reactor: int, cepci: in
     results["PTSA Reactant Cost"] = ptsa_cost
     results["IPA Reactant Cost"] = ipa_opex
     results["IPP Reactant Profit"] = ipp_profit
-    results["Reactor Operating Cost"] = ss_heater_cost * n_reactor 
+    results["Reactor Operating Cost"] = ss_heater_cost * n_reactor
     results["Reactor Wastewater Cost"] = ww_cost
-    
+
     results["Preheat Capital Cost"] = heater_cc * cepci/500
-    results["Reactor Body Capital Cost"] = reactor_pv_cc * n_reactor * cepci/500
-    results["Reactor Head Capital Cost"] = reactor_head_cc * n_reactor * cepci/500
-    results["Reactor Jacket Capital Cost"] = reactor_jacket_cc * n_reactor * cepci/500
+    results["Reactor Body Capital Cost"] = reactor_pv_cc * \
+        n_reactor * cepci/500
+    results["Reactor Head Capital Cost"] = reactor_head_cc * \
+        n_reactor * cepci/500
+    results["Reactor Jacket Capital Cost"] = reactor_jacket_cc * \
+        n_reactor * cepci/500
     return results
 
 
@@ -102,7 +104,8 @@ def pressure_vessel(D, L, P=15, s=const.pv_stress_max, e=1.0):
     thickness = num/denom + const.pv_corr_allowance  # Thickness in mm
     logger.debug(f"Pressure Vessel Thickness: {thickness:.3f} mm")
     thickness = min(thickness, const.pv_thick_min)
-    shell_weight = math.pi*D*L*(thickness/1000)*const.steel_density
+    OD = D+thickness/500
+    shell_weight = math.pi*OD*L*(thickness/1000)*const.steel_density
     logger.debug(f"Body Shell Weight: {shell_weight:.3f} kg")
     return shell_cost(shell_weight)
 
@@ -214,11 +217,12 @@ def wastewater_cost(q: float):
     q_gal = q*264.172
     return 48760*q_gal**0.64
 
-def combine_costs(results:Dict[str,float]):
+
+def combine_costs(results: Dict[str, float]):
     op_cost = 0
     cap_cost = 0
     reactant_cost = 0
-    for k,v in results.items():
+    for k, v in results.items():
         if "Operating" in k:
             op_cost += v
         elif "Capital" in k:
@@ -226,3 +230,9 @@ def combine_costs(results:Dict[str,float]):
         elif "Reactant" in k:
             reactant_cost += v
     return op_cost, cap_cost, reactant_cost
+
+
+def get_tac(reactor: RealPFR, time_interval: float, n_reactor: int, payback: int = 3):
+    costs = total_cost(reactor, time_interval, n_reactor)
+    op_cost, cap_cost, reactant_cost = combine_costs(costs)
+    return op_cost + cap_cost/payback

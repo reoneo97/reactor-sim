@@ -5,3 +5,4 @@ notebook/
 test.py
 *.npy
 .DS_Store
+logs/
