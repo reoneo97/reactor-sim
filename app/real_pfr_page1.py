@@ -54,6 +54,7 @@ def conversion_contour(conversion_slc, z_axis, r_axis):
     fig = go.Figure(contour_obj)
     fig.layout.xaxis.title = "Length/Z-axis Profile (m)"
     fig.layout.yaxis.title = "Radius Profile (m)"
+    fig.layout.title="<b>Conversion Contour</b>"
     st.plotly_chart(fig)
 
 
@@ -65,6 +66,7 @@ def temperature_contour(temp_slc, z_axis, r_axis):
     fig = go.Figure(contour_obj)
     fig.layout.xaxis.title = "Length/Z-axis Profile (m)"
     fig.layout.yaxis.title = "Radius Profile (m)"
+    fig.layout.title="<b>Temperature Contour</b>"
     st.plotly_chart(fig)
 
 
@@ -135,7 +137,7 @@ def real_pfr_iso():
             "Time Step for Simulation", min_value=0.05, max_value=0.2, step=0.05, value=0.2)
         st.info("If the simulation is having issues, reduce the timestep. However this will increase simulation time")
         time_end = st.slider(
-            "Simulation Time End", min_value=100., max_value=1000., step=50.
+            "Simulation Time End", min_value=100., max_value=2000., step=50.
         )
 
     st.write(

@@ -1,4 +1,3 @@
-from typing import final
 from simulator.reactor.pfr import RealPFR
 from . import const as const
 import math

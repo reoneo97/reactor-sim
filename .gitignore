@@ -6,3 +6,4 @@ test.py
 *.npy
 .DS_Store
 logs/
+*.pptx

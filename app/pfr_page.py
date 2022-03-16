@@ -43,14 +43,14 @@ def pfr():
 
     st.subheader("Choosing Design Parameters:")
 
-    temp = st.slider("Temperature (K)", min_value=350., max_value=480.)
+    temp = st.slider("Temperature (K)", min_value=350., max_value=480., value=393.15)
     pa_feed_hr = st.slider("Palmitic Acid Feed (kmol//hr)",
                            min_value=1., max_value=100., value=80.31)
     pa_feed = pa_feed_hr/60
     M = st.slider("Molar Ratio (Isopropyl Alcohol/Palmitic Acid)",
-                  min_value=1, max_value=25)
+                  min_value=1, max_value=5)
     vol = st.slider("Reactor Volume", min_value=0.5,
-                    max_value=100, step=0.5)
+                    max_value=100., step=0.5,value=50.)
 
     st.write("Using Default Simulation of 100 min in 0.1 min timesteps")
     time_interval = 0.05
