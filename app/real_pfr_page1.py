@@ -125,14 +125,14 @@ def real_pfr_iso():
     with col2:
         st.markdown("#### Reactor Dimensions")
         L = st.slider("Reactor Length", min_value=0.1,
-                      max_value=25., step=0.1, value=4.)
+                      max_value=25., step=0.1, value=10.)
         DIAMETER = st.slider("Reactor Diameter", min_value=0.4,
                              max_value=6., step=0.05, value=2.)
         R = DIAMETER/2
         reactor_vol = L*math.pi*R*R
         st.write(f"Volume: {reactor_vol:.3f}")
         st.markdown("#### Simulation Parameters")
-        space_interval = 51
+        space_interval = 26
         time_interval = st.slider(
             "Time Step for Simulation", min_value=0.05, max_value=0.2, step=0.05, value=0.2)
         st.info("If the simulation is having issues, reduce the timestep. However this will increase simulation time")
