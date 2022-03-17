@@ -201,14 +201,29 @@ def calculate_props_after_mixing(ipa_feed,):
     return final_temp, cp
 
 
-def pressure_drop(L, D, velocity: float, e: float):
-    rel_rough = e/D
+def pressure_drop(model:RealPFR):
+    L = model.L
+    D = model.D
+    velocity = model.velocity
+    Q = model.flow_rate
+    rho = model.density
+    rel_rough = const.rough_steel/D
     # Calculating reynolds number
 
     re = velocity*D/const.feed_viscosity
     t4 = (7.149/re) ** 0.8981
     t3 = (rel_rough ** 1.1098)/2.857
     t_34 = math.log(t3+t4, 10)
+    c_34 = 5.0452/re
+    t2 = c_34*t_34
+    t1 = -4* math.log((rel_rough/3.7065 - t2),10)
+    ff = 1/(t1*t1)
+    
+    c_ff = 32*ff/(math.pi**2)
+    l_d5 = L/(D**5)
+    p_drop = c_ff*l_d5*Q*Q*rho
+    return p_drop
+
 
 
 def wastewater_cost(q: float):

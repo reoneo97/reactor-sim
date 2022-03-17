@@ -97,19 +97,19 @@ def real_pfr_iso():
     st.markdown(
         """Real PFR design makes several assumptions:
 
-            1. Velocity of Fluid is Radially uniform
-            2. There is no back-mixing within the reactor
-            3. Heat transfer in radial direction is only limited to conduction. 
-            4. Energy loss from heating fluid to the surroundings is negligible
+        1. Velocity of Fluid is Radially uniform
+        2. There is no back-mixing within the reactor
+        3. Heat transfer in radial direction is only limited to conduction. 
+        4. Energy loss from heating fluid to the surroundings is negligible
 
-            """
+        """
     )
 
     st.subheader("Choosing Design Parameters:")
 
     col1, _, col2 = st.columns([8, 1, 8])
     with col1:
-        st.markdown("#### Reactor Conditions:")
+        st.markdown("#### 🌡 Reactor Conditions:")
         pa_feed_hr = st.slider("Palmitic Acid Feed (kmol//hr)",
                                min_value=1., max_value=100., value=80.31)
         M = st.slider("Molar Ratio (Isopropyl Alcohol/Palmitic Acid)",
@@ -123,7 +123,7 @@ def real_pfr_iso():
         pa_feed = (pa_feed_hr/60)/n_reactor
         # splitting the pa feed into n parallel reactors
     with col2:
-        st.markdown("#### Reactor Dimensions")
+        st.markdown("#### ⚗️ Reactor Dimensions")
         L = st.slider("Reactor Length", min_value=0.1,
                       max_value=25., step=0.1, value=10.)
         DIAMETER = st.slider("Reactor Diameter", min_value=0.4,
@@ -192,6 +192,7 @@ def real_pfr_iso():
             Output Temperature: {output_temp:.2f}K \n
             Output Conversion: {output_conversion:.3f} \n
             Fluid Velocity: {model.velocity:.3f} m/min \n
+            Pressure Drop: {model.pressure_drop:.3f} kPa \n
             Volumetric Flow Rate: {model.flow_rate:.3f} m3/min \n
             Jacket Heat Flow Rate: {st.session_state['heater_flow'][-1]*60:.3f} kJ/hr \n
             TAC: {st.session_state["TAC"]:.2f} USD
