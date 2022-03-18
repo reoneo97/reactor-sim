@@ -7,5 +7,5 @@ pages = {
     "Ideal PFR (p-TSA)": pfr,
     "Ideal PBR (ZnA/SG)": pbr,
     "Real PFR - Isothermal": real_pfr_iso,
-    "Optimized PFR": optim
+    "Optimized Real PFR": optim
 }

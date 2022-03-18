@@ -14,10 +14,10 @@ with st.sidebar:
     pg = st.radio("Page Selection",
                   options=[
                       "Real PFR - Isothermal",
+                      "Optimized Real PFR",
                       "Ideal PFR (p-TSA)",
                       "Ideal PBR (ZnA/SG)",
                   ])
-
 
 def project_header():
     st.title("Team 25 FYDP - Section 7 Simulator 🧪")

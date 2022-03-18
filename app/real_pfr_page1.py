@@ -236,4 +236,4 @@ def real_pfr_iso():
                     conv_slc, vol_weights, z_axis, r_axis, time_slider)
 
         if st.session_state["simulation_done"]:
-            st.write(pd.DataFrame([st.session_state["costing"]]))
+            st.write(pd.DataFrame([st.session_state["costing"]]).T)
