@@ -54,6 +54,7 @@ def conversion_contour(conversion_slc, z_axis, r_axis):
     fig = go.Figure(contour_obj)
     fig.layout.xaxis.title = "Length/Z-axis Profile (m)"
     fig.layout.yaxis.title = "Radius Profile (m)"
+    fig.layout.title="<b>Conversion Contour</b>"
     st.plotly_chart(fig)
 
 
@@ -65,6 +66,7 @@ def temperature_contour(temp_slc, z_axis, r_axis):
     fig = go.Figure(contour_obj)
     fig.layout.xaxis.title = "Length/Z-axis Profile (m)"
     fig.layout.yaxis.title = "Radius Profile (m)"
+    fig.layout.title="<b>Temperature Contour</b>"
     st.plotly_chart(fig)
 
 
@@ -95,19 +97,19 @@ def real_pfr_iso():
     st.markdown(
         """Real PFR design makes several assumptions:
 
-            1. Velocity of Fluid is Radially uniform
-            2. There is no back-mixing within the reactor
-            3. Heat transfer in radial direction is only limited to conduction. 
-            4. Energy loss from heating fluid to the surroundings is negligible
+        1. Velocity of Fluid is Radially uniform
+        2. There is no back-mixing within the reactor
+        3. Heat transfer in radial direction is only limited to conduction. 
+        4. Energy loss from heating fluid to the surroundings is negligible
 
-            """
+        """
     )
 
     st.subheader("Choosing Design Parameters:")
 
     col1, _, col2 = st.columns([8, 1, 8])
     with col1:
-        st.markdown("#### Reactor Conditions:")
+        st.markdown("#### 🌡 Reactor Conditions:")
         pa_feed_hr = st.slider("Palmitic Acid Feed (kmol//hr)",
                                min_value=1., max_value=100., value=80.31)
         M = st.slider("Molar Ratio (Isopropyl Alcohol/Palmitic Acid)",
@@ -121,21 +123,20 @@ def real_pfr_iso():
         pa_feed = (pa_feed_hr/60)/n_reactor
         # splitting the pa feed into n parallel reactors
     with col2:
-        st.markdown("#### Reactor Dimensions")
-        L = st.slider("Reactor Length", min_value=0.1,
-                      max_value=25., step=0.01, value=4.)
+        st.markdown("#### ⚗️ Reactor Dimensions")
+        L = st.slider("Reactor Length", min_value=0.1, max_value=25., step=0.1, value=10.)
         DIAMETER = st.slider("Reactor Diameter", min_value=0.4,
                              max_value=6., step=0.01, value=2.)
         R = DIAMETER/2
         reactor_vol = L*math.pi*R*R
         st.write(f"Volume: {reactor_vol:.3f}")
         st.markdown("#### Simulation Parameters")
-        space_interval = 51
+        space_interval = 26
         time_interval = st.slider(
             "Time Step for Simulation", min_value=0.05, max_value=0.2, step=0.05, value=0.2)
         st.info("If the simulation is having issues, reduce the timestep. However this will increase simulation time")
         time_end = st.slider(
-            "Simulation Time End", min_value=100., max_value=1000., step=50.
+            "Simulation Time End", min_value=100., max_value=2000., step=50.
         )
 
     st.write(
@@ -190,6 +191,7 @@ def real_pfr_iso():
             Output Temperature: {output_temp:.2f}K \n
             Output Conversion: {output_conversion:.3f} \n
             Fluid Velocity: {model.velocity:.3f} m/min \n
+            Pressure Drop: {model.pressure_drop:.3f} kPa \n
             Volumetric Flow Rate: {model.flow_rate:.3f} m3/min \n
             Jacket Heat Flow Rate: {st.session_state['heater_flow'][-1]*60:.3f} kJ/hr \n
             TAC: {st.session_state["TAC"]:.2f} USD
