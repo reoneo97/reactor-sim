@@ -111,21 +111,21 @@ def real_pfr_iso():
         pa_feed_hr = st.slider("Palmitic Acid Feed (kmol//hr)",
                                min_value=1., max_value=100., value=80.31)
         M = st.slider("Molar Ratio (Isopropyl Alcohol/Palmitic Acid)",
-                      min_value=1., max_value=8., value=5., step=0.1)
+                      min_value=1., max_value=5., value=5., step=0.01)
         feed_temp = st.slider("Feed Temperature (K)",
-                              min_value=293., max_value=433.15, value=393.)
+                              min_value=293., max_value=428.15, value=393., step=0.01)
         heat_temp = st.slider("Heater Temperature (K)",
                               min_value=373., max_value=523., value=433.15)
         n_reactor = st.slider("Number of Parallel Reactors",
-                              min_value=1, max_value=4, step=1)
+                              min_value=1, max_value=8, step=1)
         pa_feed = (pa_feed_hr/60)/n_reactor
         # splitting the pa feed into n parallel reactors
     with col2:
         st.markdown("#### Reactor Dimensions")
         L = st.slider("Reactor Length", min_value=0.1,
-                      max_value=25., step=0.1, value=4.)
+                      max_value=25., step=0.01, value=4.)
         DIAMETER = st.slider("Reactor Diameter", min_value=0.4,
-                             max_value=6., step=0.05, value=2.)
+                             max_value=6., step=0.01, value=2.)
         R = DIAMETER/2
         reactor_vol = L*math.pi*R*R
         st.write(f"Volume: {reactor_vol:.3f}")
@@ -236,4 +236,4 @@ def real_pfr_iso():
                     conv_slc, vol_weights, z_axis, r_axis, time_slider)
 
         if st.session_state["simulation_done"]:
-            st.write([st.session_state["costing"]])
+            st.write(pd.DataFrame([st.session_state["costing"]]))
