@@ -111,7 +111,7 @@ def real_pfr_iso():
     with col1:
         st.markdown("#### 🌡 Reactor Conditions:")
         pa_feed_hr = st.slider("Palmitic Acid Feed (kmol//hr)",
-                               min_value=1., max_value=100., value=80.31)
+                               min_value=1., max_value=100., value=80.019)
         M = st.slider("Molar Ratio (Isopropyl Alcohol/Palmitic Acid)",
                       min_value=1., max_value=5., value=5., step=0.01)
         feed_temp = st.slider("Feed Temperature (K)",

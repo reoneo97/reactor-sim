@@ -41,12 +41,12 @@ class Reactor:
         flow rate is uniform in both the axial and radial direction
         """
         pa_wt = self.pa_feed*const.palm_acid_wt
-        pa_flow = pa_wt/const.palm_acid_density
-
+        self.pa_flow = pa_wt/const.palm_acid_density
+        
         ipa_wt = self.ipa_feed*const.ipa_wt
         ipa_flow = ipa_wt/const.ipa_density
         self.mass_flow = pa_wt+ipa_wt
-        self.flow_rate = ipa_flow + pa_flow  # Volumetric Flow
+        self.flow_rate = ipa_flow + self.pa_flow  # Volumetric Flow
 
         self.molar_flow_rate = self.pa_feed + self.ipa_feed
         self.density = self.mass_flow/self.flow_rate

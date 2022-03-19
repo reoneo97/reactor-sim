@@ -46,7 +46,7 @@ def total_cost(reactor: RealPFR, time_interval: float, n_reactor: int, cepci: in
     preheat_duty_kw = preheat_duty/3600  # Duty in KW
     preheat_cost = preheat_duty*8000/1e6*const.mps_cost_gj
 
-    ptsa_loading = reactor.flow_rate*1000*5  # m^3/ min * 5 g/dm3 -> g/min
+    ptsa_loading = reactor.pa_flow*1000*5  # m^3/ min * 5 g/dm3 -> g/min
     ptsa_cost = ptsa_loading*60*8000*const.ptsa_cost_per_g*ptsa_recovery
 
     ipa_wt_rate = ipa_feed*const.ipa_wt  # kg/hr
@@ -89,7 +89,7 @@ def total_cost(reactor: RealPFR, time_interval: float, n_reactor: int, cepci: in
     results["Reactor Body Capital Cost"] = reactor_pv_cc * \
         n_reactor * cepci/500
     results["Reactor Head Capital Cost"] = reactor_head_cc * \
-        n_reactor * cepci/500
+        n_reactor * cepci/500 *2
     results["Reactor Jacket Capital Cost"] = reactor_jacket_cc * \
         n_reactor * cepci/500
     return results
