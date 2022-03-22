@@ -43,13 +43,16 @@ def pbr():
 
     st.subheader("Choosing Design Parameters:")
 
-    temp = st.slider("Temperature (K)", min_value=350., max_value=480.)
-    pa_feed = st.slider("Palmitic Acid Feed (mol//min)",
-                        min_value=10., max_value=1000.)
+    temp = st.slider("Temperature (K)", min_value=350.,
+                     max_value=480., value=393.15)
+    pa_feed_hr = st.slider("Palmitic Acid Feed (kmol//hr)",
+                           min_value=1., max_value=100., value=80.31)
+    pa_feed = pa_feed_hr/60
     M = st.slider("Molar Ratio (Isopropyl Alcohol/Palmitic Acid)",
-                  min_value=1, max_value=25)
-    vol = st.slider("Reactor Volume", min_value=1.,
-                    max_value=1e5, step=0.5)
+                  min_value=1, max_value=5)
+    vol = st.slider("Reactor Volume", min_value=0.5,
+                    max_value=100., step=0.5, value=35.)
+
     weight = st.slider("Catalyst Weight", min_value=1000.,
                        max_value=1e10, step=1000.)
     rate_test = st.slider("Rate Coeff", min_value=1, max_value=100, step=1)

@@ -6,4 +6,10 @@ test.py
 *.npy
 .DS_Store
 logs/
+<<<<<<< HEAD
 !data/2022-03-17 16-34_3.00e+07.csv
+=======
+*.pptx
+*.bib
+refs/
+>>>>>>> e14df986161667807b6faccdc70ced3dc43b7890

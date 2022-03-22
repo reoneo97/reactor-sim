@@ -163,6 +163,7 @@ class RealPFR(Reactor):
         self.reaction = rxn_model
         super().init_flow_rate()
         self.velocity = self.flow_rate/self.cross_area
+        self.get_pressure_drop()
 
     def log(self, info):
         """
@@ -442,3 +443,25 @@ class RealPFR(Reactor):
 
     def get_heater_total(self):
         return self.heater_total
+
+    def get_pressure_drop(self):
+        Q = self.flow_rate
+        rho = self.density
+        rel_rough = const.rough_steel/self.D
+        # Calculating reynolds number
+
+        re = self.velocity*self.D/const.feed_viscosity # This is kinematic viscosity 
+        logger.info(f"Reynolds Number: {re}")
+        t4 = (7.149/re) ** 0.8981
+        t3 = (rel_rough ** 1.1098)/2.857
+        t_34 = math.log(t3+t4, 10)
+        c_34 = 5.0452/re
+        t2 = c_34*t_34
+        t1 = -4 * math.log((rel_rough/3.7065 - t2), 10)
+        ff = 1/(t1*t1)
+        logger.info(f"Friction Factor {ff:.2f}")
+        c_ff = 32*ff/(math.pi**2)
+        l_d5 = self.L/(self.D**5)
+        p_drop = c_ff*l_d5*Q*Q*rho
+        self.pressure_drop = p_drop
+        logger.info(f"Pressure Drop:{self.pressure_drop} kPa")
