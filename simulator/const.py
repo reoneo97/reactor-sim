@@ -28,7 +28,7 @@ h_heater = 0.281*60  # Overall heat transfer coefficient kJ/min/m^2 K
 
 # Costs
 ipa_cost = 1.5  # USD/kg
-ipp_cost = 475  # USD/kg
+ipp_cost = 15  # USD/kg
 
 lps_cost = 5.56e-3  # USD/kg
 lps_cost_gj = 4.54  # $/GJ

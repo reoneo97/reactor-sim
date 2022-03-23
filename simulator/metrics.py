@@ -46,10 +46,11 @@ def total_cost(reactor: RealPFR, time_interval: float, n_reactor: int, cepci: in
     preheat_duty_kw = preheat_duty/3600  # Duty in KW
     preheat_cost = preheat_duty*8000/1e6*const.mps_cost_gj
 
-    ptsa_loading = reactor.flow_rate*1000*5  # m^3/ min * 5 g/dm3 -> g/min
+    ptsa_loading = n_reactor*reactor.flow_rate*1000*5  # m^3/ min * 5 g/dm3 -> g/min
     ptsa_cost = ptsa_loading*60*8000*const.ptsa_cost_per_g*ptsa_recovery
 
-    ipa_wt_rate = ipa_feed*const.ipa_wt  # kg/hr
+    ipa_wt_rate = n_reactor*ipa_feed*const.ipa_wt  # kg/hr
+    logger.info(f"IPA Loading: {ipa_wt_rate:.2f}")
     ipa_opex = ipa_wt_rate*const.ipa_cost*8000  # kg/hr * 8000 hr/yr = kg/year
 
     ipp_out = reactor.pa_feed*conversion*60  # kmol/min -> kmol/hr
@@ -201,7 +202,7 @@ def calculate_props_after_mixing(ipa_feed,):
     return final_temp, cp
 
 
-def pressure_drop(model:RealPFR):
+def pressure_drop(model: RealPFR):
     L = model.L
     D = model.D
     velocity = model.velocity
@@ -216,14 +217,13 @@ def pressure_drop(model:RealPFR):
     t_34 = math.log(t3+t4, 10)
     c_34 = 5.0452/re
     t2 = c_34*t_34
-    t1 = -4* math.log((rel_rough/3.7065 - t2),10)
+    t1 = -4 * math.log((rel_rough/3.7065 - t2), 10)
     ff = 1/(t1*t1)
-    
+
     c_ff = 32*ff/(math.pi**2)
     l_d5 = L/(D**5)
     p_drop = c_ff*l_d5*Q*Q*rho
     return p_drop
-
 
 
 def wastewater_cost(q: float):
