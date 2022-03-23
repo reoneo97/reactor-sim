@@ -14,7 +14,7 @@ ipp_wt = 298.511
 
 ptsa_density = 1240
 ptsa_wt = 172.2
-ptsa_cost_per_g = (225000/1000)/1000
+ptsa_cost_per_g = 1.31e-3
 
 zna_particle_size = 32e-6
 zna_surface_area = 89.97  # m^2g^-1
@@ -27,8 +27,8 @@ k_e = 0.4399e-3 * 60  # Average Thermal Conductivity for Solution
 h_heater = 0.281*60  # Overall heat transfer coefficient kJ/min/m^2 K
 
 # Costs
-ipa_cost = 3  # USD/kg
-ipp_cost = 475  # USD/kg
+ipa_cost = 1.5  # USD/kg
+ipp_cost = 15  # USD/kg
 
 lps_cost = 5.56e-3  # USD/kg
 lps_cost_gj = 4.54  # $/GJ
@@ -38,8 +38,8 @@ electricity_cost = 18.72  # $/GJ
 
 mps_temp = 273.15+184
 
-jacket_reactor_a = 53000
-jacket_reactor_b = 28000
+jacket_reactor_a = 5300
+jacket_reactor_b = 2800
 jacket_reactor_n = 0.8
 
 # Calculate Temperature after mixing
