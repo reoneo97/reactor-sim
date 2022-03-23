@@ -39,7 +39,7 @@ def total_cost(reactor: RealPFR, time_interval: float, n_reactor: int, cepci: in
     # Heating of IPA and Feed Mixture
 
     # Feed_cp here is in terms of kJ/ C instead of kJ/kmol C. Dont need to multiply with anything
-    inlet_temp, feed_cp = calculate_props_after_mixing(ipa_feed)
+    inlet_temp, feed_cp = calculate_props_after_mixing(ipa_feed*n_reactor)
     # Calculating Chemical Cost
     feed_temp = reactor.feed_temp
     preheat_duty = (feed_temp - inlet_temp)*feed_cp
