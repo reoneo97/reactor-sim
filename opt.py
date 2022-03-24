@@ -49,7 +49,7 @@ def run_simulation(L, D, M, feed_temp, n_reactor, time_interval=0.2, time_end=50
         return -1e13
 
 
-LAMBDA = 1e9
+LAMBDA = 5e9
 
 optimizer = BayesianOptimization(
     f=run_simulation,
@@ -60,8 +60,8 @@ logger = JSONLogger(path="./logs/logs.json")
 optimizer.subscribe(Events.OPTIMIZATION_STEP, logger)
 try:
     optimizer.maximize(
-        init_points=20,
-        n_iter=70,
+        init_points=40,
+        n_iter=110,
     )
     info_df = pd.DataFrame(info)
 except:
