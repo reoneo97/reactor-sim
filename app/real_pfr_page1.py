@@ -129,7 +129,9 @@ def real_pfr_iso():
                              max_value=6., step=0.01, value=2.)
         R = DIAMETER/2
         reactor_vol = L*math.pi*R*R
-        st.write(f"Volume: {reactor_vol:.3f}")
+        reactor_area = L*math.pi*DIAMETER
+        st.write(
+            f"Volume: {reactor_vol:.3f} m³ | Surface Area: {reactor_vol:.3f} m²")
         st.markdown("#### Simulation Parameters")
         space_interval = 26
         time_interval = st.slider(

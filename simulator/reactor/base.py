@@ -39,6 +39,8 @@ class Reactor:
         """
         Obtain volumetric flow rate for the reactor. Assumes that the volumetric
         flow rate is uniform in both the axial and radial direction
+
+        All feed and flow rates are based on /min
         """
         pa_wt = self.pa_feed*const.palm_acid_wt
         self.pa_flow = pa_wt/const.palm_acid_density

@@ -26,7 +26,7 @@ def total_cost(reactor: RealPFR, time_interval: float, n_reactor: int, cepci: in
     D = reactor.D
     L = reactor.L
     VOL = reactor.vol
-    reactor_flow_rate = reactor.flow_rate
+    reactor_flow_rate = reactor.flow_rate # m3/min
     # Recovery Values - Based on preliminary hysys separation for base case
     ipp_recovery = 1  # How much IPP can be obtained at 99 % purity after separation
     ptsa_recovery = 1
@@ -70,6 +70,7 @@ def total_cost(reactor: RealPFR, time_interval: float, n_reactor: int, cepci: in
     logger.info(f"Wastewater Volume: {ww_vol:.3f} m3/min")
     ww_cost = wastewater_cost(ww_vol)
 
+    pump_capex = get_pump_cc(reactor_flow_rate) 
     # Capital Cost Calculation
     heater_cc = get_heater_cc(inlet_temp, feed_temp, preheat_duty_kw)
     reactor_pv_cc = pressure_vessel(D, L)
@@ -84,7 +85,7 @@ def total_cost(reactor: RealPFR, time_interval: float, n_reactor: int, cepci: in
     results["IPP Reactant Profit"] = ipp_profit
     results["Reactor Operating Cost"] = ss_heater_cost * n_reactor
     results["Reactor Wastewater Cost"] = ww_cost
-
+    results["Pump Capital Cost"] = pump_capex * cepci/500
     results["Preheat Capital Cost"] = heater_cc * cepci/500
     results["Reactor Body Capital Cost"] = reactor_pv_cc * \
         n_reactor * cepci/500
@@ -147,6 +148,13 @@ def temp_lm(h_i: float, h_o: float, c_i: float, c_o: float):
     dt2 = h_o - c_i
     return dt1 - dt2/(math.log(dt1/dt2))
 
+def get_pump_cc(reactor_flow_rate:float):
+    """Calculate capital cost for pump
+    Args:
+        reactor_flow_rate (float): m3/min
+    """
+    fr_ls = reactor_flow_rate/60*1000
+    return const.pump_a + const.pump_b*fr_ls**const.pump_n
 
 def get_heater_cc(inlet_temp: float, feed_temp: float, duty: float):
     """Calculate the capital cost of the heater given the feed temperature 
