@@ -160,7 +160,7 @@ def optim():
             cost_dict = total_cost(model, time_interval, n_reactor)
 
             st.session_state["costing"] = cost_dict
-            st.session_state["TAC"] = get_tac(model, time_interval, n_reactor)
+            # st.session_state["TAC"] = get_tac(model, time_interval, n_reactor)
 
     st.markdown("---")
     cost_container = st.container()
@@ -192,7 +192,6 @@ def optim():
             Fluid Velocity: {model.velocity:.3f} m/min \n
             Volumetric Flow Rate: {model.flow_rate:.3f} m3/min \n
             Jacket Heat Flow Rate: {st.session_state['heater_flow'][-1]*60:.3f} kJ/hr \n
-            TAC: {st.session_state["TAC"]:.2f} USD
             """
             st.write(info)
 
@@ -236,4 +235,4 @@ def optim():
                     conv_slc, vol_weights, z_axis, r_axis, time_slider)
 
         if st.session_state["simulation_done"]:
-            st.write(pd.DataFrame([st.session_state["costing"]]))
+            st.write(pd.DataFrame([st.session_state["costing"]]).T)

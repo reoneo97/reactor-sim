@@ -54,7 +54,7 @@ def conversion_contour(conversion_slc, z_axis, r_axis):
     fig = go.Figure(contour_obj)
     fig.layout.xaxis.title = "Length/Z-axis Profile (m)"
     fig.layout.yaxis.title = "Radius Profile (m)"
-    fig.layout.title="<b>Conversion Contour</b>"
+    fig.layout.title = "<b>Conversion Contour</b>"
     st.plotly_chart(fig)
 
 
@@ -66,7 +66,7 @@ def temperature_contour(temp_slc, z_axis, r_axis):
     fig = go.Figure(contour_obj)
     fig.layout.xaxis.title = "Length/Z-axis Profile (m)"
     fig.layout.yaxis.title = "Radius Profile (m)"
-    fig.layout.title="<b>Temperature Contour</b>"
+    fig.layout.title = "<b>Temperature Contour</b>"
     st.plotly_chart(fig)
 
 
@@ -124,7 +124,8 @@ def real_pfr_iso():
         # splitting the pa feed into n parallel reactors
     with col2:
         st.markdown("#### ⚗️ Reactor Dimensions")
-        L = st.slider("Reactor Length", min_value=0.1, max_value=25., step=0.1, value=10.)
+        L = st.slider("Reactor Length", min_value=0.1,
+                      max_value=25., step=0.1, value=10.)
         DIAMETER = st.slider("Reactor Diameter", min_value=0.4,
                              max_value=6., step=0.01, value=2.)
         R = DIAMETER/2
@@ -163,7 +164,7 @@ def real_pfr_iso():
             cost_dict = total_cost(model, time_interval, n_reactor)
 
             st.session_state["costing"] = cost_dict
-            st.session_state["TAC"] = get_tac(model, time_interval, n_reactor)
+            # st.session_state["TAC"] = get_tac(model, time_interval, n_reactor)
 
     st.markdown("---")
     cost_container = st.container()
@@ -196,7 +197,6 @@ def real_pfr_iso():
             Pressure Drop: {model.pressure_drop:.3f} kPa \n
             Volumetric Flow Rate: {model.flow_rate:.3f} m3/min \n
             Jacket Heat Flow Rate: {st.session_state['heater_flow'][-1]*60:.3f} kJ/hr \n
-            TAC: {st.session_state["TAC"]:.2f} USD
             """
             st.write(info)
 

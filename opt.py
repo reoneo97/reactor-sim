@@ -25,7 +25,7 @@ blank = {
 }
 
 
-def run_simulation(L, D, M, feed_temp, n_reactor, time_interval=0.05, time_end=500,
+def run_simulation(L, D, M, feed_temp, n_reactor, time_interval=0.2, time_end=500,
                    payback: int = 3):
     n_reactor = int(n_reactor)
     model = RealPFR(80.31/60/n_reactor, M, L, D/2, feed_temp, 433.15, 26)
@@ -49,7 +49,7 @@ def run_simulation(L, D, M, feed_temp, n_reactor, time_interval=0.05, time_end=5
         return -1e13
 
 
-LAMBDA = 3e7
+LAMBDA = 5e9
 
 optimizer = BayesianOptimization(
     f=run_simulation,
@@ -61,7 +61,7 @@ optimizer.subscribe(Events.OPTIMIZATION_STEP, logger)
 try:
     optimizer.maximize(
         init_points=40,
-        n_iter=100,
+        n_iter=110,
     )
     info_df = pd.DataFrame(info)
 except:
