@@ -71,3 +71,7 @@ pv_corr_allowance = 3  # mm
 pv_thick_min = 9  # mm
 
 steel_density = 8000
+
+pump_a= 6900
+pump_b = 206
+pump_n = 0.9
