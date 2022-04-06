@@ -350,8 +350,6 @@ class RealPFR(Reactor):
                             prev_data_l[j-1, 0] - init_temp)/dr * in_area_r * const.k_e
 
                     if j == self.space_interval-1:
-                        # TODO: Find the Heat Transfer Coefficient for HEater TEmp
-                        # TODO: Should remove the dr, since this is not a conduction and there is no KE
                         cond_r_out = (self.heater_temp -
                                       init_temp) * out_area_r * const.h_heater
                         heater_heat_out += cond_r_out

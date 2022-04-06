@@ -136,10 +136,10 @@ def real_pfr_iso():
         st.markdown("#### Simulation Parameters")
         space_interval = 26
         time_interval = st.slider(
-            "Time Step for Simulation", min_value=0.05, max_value=0.2, step=0.05, value=0.2)
+            "Time Step for Simulation", min_value=0.2, max_value=0.5, step=0.05, value=0.2)
         st.info("If the simulation is having issues, reduce the timestep. However this will increase simulation time")
         time_end = st.slider(
-            "Simulation Time End", min_value=100., max_value=2000., step=50.
+            "Simulation Time End", min_value=100., max_value=500., step=50.
         )
 
     st.write(
